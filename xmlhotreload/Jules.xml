@@ -1,0 +1,1149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<hotReloadConfiguration>
+    <calculations>
+        <automaticScenariosCalculation>true</automaticScenariosCalculation>
+        <automaticMetasCalculation>true</automaticMetasCalculation>
+        <automaticReportsCalculation>true</automaticReportsCalculation>
+    </calculations>
+    <importCsv filtreCSV=""/>
+    <batch maxRequest="500"/>
+    <loggers />
+    <bannerSearches>
+        <bannerSearch description="Recherche" queryId="default-search"/>
+        <bannerSearch description="Requête" icon="ressources/icons/query.svg" queryId="default-query" />
+    </bannerSearches>
+    <authentication></authentication>
+    <filesTransfer visible="true"></filesTransfer>
+    <infoPopup display="true">
+        <infoTab title="Metamodel" contentType="HTML_VIEW" contentName="metamodel"/>
+        <infoTab title="Documentation" contentType="HTML_VIEW" contentName="documentation"/>
+    </infoPopup>
+    <infos>
+        <appTitle>MAP - SI Jules Bizbee</appTitle>
+        <companyName>CGI</companyName>
+        <copyrightYear>2019</copyrightYear>
+    </infos>
+    <menu mode="accordion">
+        <folder libelle="Indicateurs">
+            <item type="DASHBOARD" link="summaryDB">Indicateurs généraux</item>
+            <item type="BAR_CHART" link="nbArtStatus" >Status de validation</item>
+            <item type="QUERY" icon="ressources/icons/graph.svg" link="uncompleteFlows">Flux incomplets</item>
+        </folder>
+        <folder libelle="Cartographie métier">
+            <item type="QUERY" icon="ressources/icons/graph.svg" link="graph-business">Graphe de la couche métier</item>
+            <item type="QUERY" icon="ressources/icons/graph.svg" link="graph-valueStreams">Enchainement des valueStreams</item>
+            <item type="QUERY" icon="ressources/icons/explorer.svg" link="valueStream-explorer">Arborescence métier</item>
+            <!-- enlevé car seul un flux est modélisé et uniquement sur Pimkie <item type="QUERY" icon="ressources/icons/explorer.svg" link="process-graph">Process graph</item> -->
+        </folder>
+        <folder libelle="Cartographie fonctionnelle">
+            <item type="QUERY" icon="ressources/icons/explorer.svg" link="Domain-explorer">Domaines</item>
+            <!-- enlevé car le lien Domaine>>application n'est pas direct et peut manquer dans certains cas (si on a juste Domaines >>BP +	Macro BP >>application) ==>il faudrait créer un algo dédié -->
+            <!-- <item type="HTML_VIEW" icon="ressources/icons/pos.svg" link="pos">Répartition des applications par fonctions</item>-->
+            <item link="#" type="URL" color="grey" >RASCI?</item>
+        </folder>
+        <folder libelle="Cartographie applicative">
+            <item type="QUERY" icon="ressources/icons/graph.svg" link="graph-applications">Graphe de la couche applicative</item>
+            <item type="QUERY" icon="ressources/icons/explorer.svg" link="application-explorer">Applications - explorer</item>
+            <item type="QUERY" icon="ressources/icons/tabular.svg" link="application-table">Applications - liste à plat</item>
+            <item type="PIE_CHART" link="report-app-by-level">Applications par SLA</item>
+            <item type="QUERY" icon="ressources/icons/graph.svg" link="application-byVendor">Applications et éditeurs</item>
+            <!-- enlevé car spécifique Pimkie <item type="QUERY" icon="ressources/icons/graph.svg" link="application-byEntrypoint">Apps sur Portail web et Smartphone</item> -->
+            <!-- enlevé car spécifique Pimkie <item type="QUERY" icon="ressources/icons/graph.svg" link="MktPlace-ventesCommandes">Focus séquence :MktPlace-ventesCommandes</item> -->
+            <!-- enlevé car spécifique Pimkie <item type="QUERY" icon="ressources/icons/graph.svg" link="MktPlace-cataloguesTarifs">Focus séquence :MktPlace-cataloguesTarifs</item> -->
+        </folder>
+        <folder libelle="Cartographie technique">
+            <item type="QUERY" icon="ressources/icons/explorer.svg" link="techFlow-explorer">Analyse d'impact depuis un flux technique</item>
+        </folder>
+        <folder libelle="Organisation?" color="grey"></folder>
+    </menu>
+    <dashboards>
+        <dashboard id="summaryDB"  title="tableau de bord"	layout="default" display="true">
+            <rapport id="KPInbArts" />
+            <rapport id="KPInbRels" />
+            <rapport id="KPInbUnknown" />
+            <rapport id="nbArtType" />
+        </dashboard>
+    </dashboards>
+    <rapports>
+        <rapport id='welcome' title="html" display='true'
+			type="HTML_VIEW">
+            <htmlDefinition>
+                <source>ressources/html/welcome.html</source>
+            </htmlDefinition>
+        </rapport>
+        <rapport id='documentation' title="html" display='true'
+			type="HTML_VIEW">
+            <htmlDefinition>
+                <source>ressources/html/documentation.html</source>
+            </htmlDefinition>
+        </rapport>
+        <rapport id='metamodel' title="html" display='true'
+			type="HTML_VIEW">
+            <htmlDefinition>
+                <source>ressources/html/metamodel.html</source>
+            </htmlDefinition>
+        </rapport>
+        <rapport id='pos' title="html" display='true'
+			type="HTML_VIEW">
+            <htmlDefinition>
+                <source>ressources/html/pos.html</source>
+            </htmlDefinition>
+        </rapport>
+        <rapport id='KPInbArts' title="Number of nodes" display='true' type="KPI_VIEW" calculation="live">
+            <kpiViewDefinition>
+                <kpi drill-down="true">
+                    <query>
+                        <simpleQuery>
+                            <from>*</from>
+                            <return>*</return>
+                        </simpleQuery>
+                        <operation>COUNT</operation>
+                    </query>
+                    <kpiText>Number of nodes</kpiText>
+                </kpi>
+            </kpiViewDefinition>
+        </rapport>
+        <rapport id='KPInbRels' title="Number or relationships" display='true' type="KPI_VIEW" calculation="live">
+            <kpiViewDefinition>
+                <kpi drill-down="true">
+                    <query>
+                        <simpleQuery>
+                            <from>*</from>
+                            <follow>*>>*>>*</follow>
+                            <followdepth>1</followdepth>
+                            <return>*>>*>>*</return>
+                        </simpleQuery>
+                        <operation>COUNT</operation>
+                    </query>
+                    <kpiText>Number or relationships</kpiText>
+                </kpi>
+            </kpiViewDefinition>
+        </rapport>
+        <rapport id='KPInbUnknown' title="Number of unknowns" display='true' type="KPI_VIEW" calculation="live">
+            <kpiViewDefinition>
+                <kpi drill-down="true">
+                    <zone letter="A" color="green" max-threshold="500" included="true" />
+                    <zone letter="B" color="orange" max-threshold="5000" included="true" />
+                    <zone letter="C" color="red" max-threshold="10000" included="true" />
+                    <query>
+                        <simpleQuery>
+                            <from>unknown</from>
+                            <return>*</return>
+                        </simpleQuery>
+                        <operation>COUNT</operation>
+                    </query>
+                    <kpiText>Number of unknowns</kpiText>
+                </kpi>
+            </kpiViewDefinition>
+        </rapport>
+        <rapport id="nbArtType" title="Nb of nodes by type" display="true" type="PIE_CHART" calculation="live">
+            <description display="true">Nb of nodes by type</description>
+            <pieChartDefinition>
+                <pieRendering>
+                    <style type="donut"/>
+                    <legend show="true" position="right"/>
+                    <dataLabels show="true" format="ratio"/>
+                </pieRendering>
+                <data>
+                    <dim1 mode="fixe">
+                        <dimension name="Value Stream" matcher="ValueStream"/>
+                        <dimension name="Macro Business Process" matcher="MacroBusinessProcess"/>
+                        <dimension name="Business Process" matcher="BusinessProcess"/>
+                        <dimension name="Activity" matcher="Activity"/>
+                        <dimension name="Role" matcher="Role"/>
+                        <dimension name="Business Object" matcher="BusinessObject"/>
+                        <dimension name="Data Sphere" matcher="DataSphere"/>
+                        <dimension name="Middleware" matcher="Middleware"/>
+                        <dimension name="Domain" matcher="Domain"/>
+                        <dimension name="Application" matcher="Application"/>
+                        <dimension name="MacroApplication" matcher="MacroApplication"/>
+                        <dimension name="PartnerApplication" matcher="PartnerApplication"/>
+                        <dimension name="Partner" matcher="Partner"/>
+                        <dimension name="Vendor" matcher="Vendor"/>
+                        <dimension name="Logical Flow" matcher="LogicalFlow"/>
+                        <dimension name="Technical Flow" matcher="TechnicalFlow"/>
+                        <dimension name="File" matcher="File"/>
+                        <!--<dimension name="Table" matcher="Table"/>-->
+                    </dim1>
+                    <values drill-down="true">
+                        <query>
+                            <simpleQuery>
+                                <from>@key1</from>
+                                <return>*</return>
+                            </simpleQuery>
+                            <operation>COUNT()</operation>
+                        </query>
+                    </values>
+                </data>
+            </pieChartDefinition>
+        </rapport>
+        <rapport id="nbArtStatus" title='Nb of nodes by status' display="true" type="BAR_CHART" calculation="live">
+            <description display="true">Nb of nodes by status</description>
+            <barChartDefinition>
+                <barRendering>
+                    <legend show="true" position="bottom" />
+                    <dataLabels show="true" format="ratio" />
+                    <style>
+                        <groups>
+                            <group>Initié,A revoir,Revu,absent,[non renseigné]</group>
+                        </groups>
+                    </style>
+                    <zoom enabled="true" />
+                    <axis rotated="false">
+                        <yAxis>
+                            <label position="inner-top">Nombre</label>
+                        </yAxis>
+                        <xAxis type="category">
+                            <label position="outer-center">Status de validation</label>
+                            <tick rotate="60" />
+                        </xAxis>
+                    </axis>
+                </barRendering>
+                <data>
+                    <dim1 mode="fixe">
+                        <dimension name="Application" matcher="Application"/>
+                        <dimension name="MacroApplication" matcher="MacroApplication"/>
+                        <dimension name="PartnerApplication" matcher="PartnerApplication"/>
+                        <dimension name="Partner" matcher="Partner"/>
+                        <dimension name="Vendor" matcher="Vendor"/>
+                        <dimension name="Logical Flow" matcher="LogicalFlow"/>
+                    </dim1>
+                    <dim2 mode="fixe">
+                        <dimension name="Initié" matcher="status=Initié" />
+                        <dimension name="A revoir" matcher="status=A revoir" />
+                        <dimension name="Revu" matcher="status=Revu" />
+                        <dimension name="[non renseigné]" matcher="status IS NULL" />
+                    </dim2>
+                    <values drill-down="true">
+                        <query>
+                            <simpleQuery>
+                                <from>@key1(@key2)</from>
+                                <return>*</return>
+                            </simpleQuery>
+                            <operation>COUNT</operation>
+                        </query>
+                    </values>
+                </data>
+            </barChartDefinition>
+        </rapport>
+        <rapport id="report-app-by-level" title="Applications by service level agreement" display="true" type="PIE_CHART" calculation="live">
+            <description display="true">Applications by service level agreement</description>
+            <pieChartDefinition>
+                <pieRendering>
+                    <style type="donut"/>
+                    <legend show="true" position="right"/>
+                    <dataLabels show="true" format="ratio"/>
+                </pieRendering>
+                <data>
+                    <dim1 mode="fixe">
+                        <dimension name="BASIC" matcher="Application(serviceLevelAgreement=&quot;BASIC&quot;)"/>
+                        <dimension name="SILVER" matcher="Application(serviceLevelAgreement=&quot;SILVER&quot;)"/>
+                        <dimension name="BRONZE" matcher="Application(serviceLevelAgreement=&quot;BRONZE&quot;)"/>
+                        <dimension name="GOLD" matcher="Application(serviceLevelAgreement=&quot;GOLD&quot;)"/>
+                    </dim1>
+                    <values drill-down="true">
+                        <query>
+                            <simpleQuery>
+                                <from>@key1</from>
+                                <return>*</return>
+                            </simpleQuery>
+                            <operation>COUNT()</operation>
+                        </query>
+                    </values>
+                </data>
+            </pieChartDefinition>
+        </rapport>
+    </rapports>
+    <loadArtefact>
+        <percentFrom>70</percentFrom>
+    </loadArtefact>
+    <codesource>
+        <path>/root/</path>
+    </codesource>
+    <graphConfig visible="true" nbMaxArtefacts="2000"/>
+    <sidenav width="550px" metaMaxHeight="150px">
+        <metasToDisplay>
+            <artefacts></artefacts>
+            <relations></relations>
+        </metasToDisplay>
+    </sidenav>
+    <token>5d0f7b78da5149cf9b3936facad3b821</token>
+    <lang>fr</lang>
+    <homePage link="welcome" type="HTML_VIEW"/>
+    <unitQueries>
+        <unitQueryAssociation types="*"                                                      	unitQueries="blankreq" />
+        <unitQueryAssociation types="Middleware"                                             	unitQueries="seeShippedLogicalFlows" />
+        <unitQueryAssociation types="LogicalFlow"                                            	unitQueries="seeTechnicalFlows" />
+        <unitQueryAssociation types="Application,MacroApplication,Partner,PartnerApplication"	unitQueries="seeFlowsAndPartners" />
+    </unitQueries>
+    <!-- queryPages -->
+    <queryPages>
+        <!-- recherches par défaut -->
+        <queryPage id="default-search" label="search">
+            <queryDefinition defaultMode="userFriendly">
+                <query>
+                    <simpleQuery>
+                        <from></from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result></result>
+        </queryPage>
+        <queryPage id="default-query" label="search query mode">
+            <queryDefinition defaultMode="mql">
+                <query>
+                    <simpleQuery>
+                        <from></from>
+                        <follow></follow>
+                        <return></return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result></result>
+        </queryPage>
+        <queryPage id="graph-applications" label="Applications graph">
+            <queryDefinition execute="true" visibility="hidden" defaultMode="mql">
+                <query>
+                    <simpleQuery>
+                        <from>Application,LogicalFlow,PartnerApplication,Partner,MacroApplication</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph"></result>
+        </queryPage>
+        <queryPage id="graph-business" label="Business graph">
+            <queryDefinition execute="true" visibility="hidden" defaultMode="mql">
+                <query>
+                    <queryOperation type="minus">
+                        <simpleQuery>
+                            <from>ValueStream,MacroBusinessProcess,BusinessProcess,Activity</from>
+                            <return>*</return>
+                        </simpleQuery>
+                        <simpleQuery>
+                            <from>:Fin,:Démarrage</from>
+                            <return>*</return>
+                        </simpleQuery>
+                    </queryOperation>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph"></result>
+        </queryPage>
+        <queryPage id="graph-valueStreams" label="ValueStream graph">
+            <queryDefinition execute="true" visibility="hidden" defaultMode="mql">
+                <query>
+                    <queryOperation type="minus">
+                        <simpleQuery>
+                            <from>ValueStream</from>
+                            <return>*</return>
+                        </simpleQuery>
+                        <simpleQuery>
+                            <from>:Fin</from>
+                            <return>*</return>
+                        </simpleQuery>
+                    </queryOperation>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph">
+                <graphView defaultMode="hierarchical">
+                    <hierarchicalRendering orientation="LR">
+                        <rootsFetchingQuery>
+                            <query>
+                                <simpleQuery>
+                                    <from>:Démarrage</from>
+                                    <return>*</return>
+                                </simpleQuery>
+                            </query>
+                        </rootsFetchingQuery>
+                    </hierarchicalRendering>
+                </graphView>
+            </result>
+        </queryPage>
+        <queryPage id="valueStream-explorer" label="Données">
+            <queryDefinition execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>ValueStream</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="explorer">
+                <explorerView>
+                    <leftPanel>
+                        <traversal>
+                            <follow>ValueStream,MacroBusinessProcess>>contains>>MacroBusinessProcess,BusinessProcess</follow>
+                            <!--relations qui pourront être déployées à partir des points de départ -->
+                        </traversal>
+                    </leftPanel>
+                </explorerView>
+            </result>
+        </queryPage>
+        <queryPage id="Domain-explorer" label="Domaines">
+            <queryDefinition execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>Domain</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="explorer">
+                <explorerView>
+                    <leftPanel>
+                        <traversal>
+                            <follow>Domain>>contains>>Function;Function>>contains>>Function</follow>
+                        </traversal>
+                    </leftPanel>
+                </explorerView>
+            </result>
+        </queryPage>
+        <!--explorer avec arborescence sur la partie droite -->
+        <queryPage id="process-graph" label="Process-graph">
+            <queryDefinition defaultMode="mql" execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>BusinessProcess</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="explorer">
+                <explorerView>
+                    <rightPanel>
+                        <explorerQueryPage searchLabel="Select a BusinessProcess to see all its steps ">
+                            <!-- Libellé qui s'affichera à droite -->
+                            <queryDefinition>
+                                <parameters>
+                                    <nodeParameter id="artKey">
+                                        <parameter id="artKey" value="key" />
+                                    </nodeParameter>
+                                </parameters>
+                                <query>
+                                    <simpleQuery>
+                                        <from>."@artKey"</from>
+                                        <follow>MacroBusinessProcess>>contains>>BusinessProcess;BusinessProcess>>starts with>>activity;activity>>is before>>activity;activity>>calls>>BusinessProcess</follow>
+                                        <return>*>>*>>*</return>
+                                        <!--si je retourne les relations uniquement, les applications sans flux ne seront pas affichées-->
+                                    </simpleQuery>
+                                </query>
+                            </queryDefinition>
+                            <result defaultMode="graph">
+                                <graphView defaultMode="hierarchical">
+                                    <hierarchicalRendering orientation="LR">
+                                        <rootsFetchingQuery>
+                                            <query>
+                                                <simpleQuery>
+                                                    <from>."@artKey"</from>
+                                                    <return>*</return>
+                                                </simpleQuery>
+                                            </query>
+                                        </rootsFetchingQuery>
+                                    </hierarchicalRendering>
+                                </graphView>
+                            </result>
+                        </explorerQueryPage>
+                    </rightPanel>
+                </explorerView>
+            </result>
+        </queryPage>
+        <queryPage id="techFlow-explorer" label="techFlow-explorer">
+            <queryDefinition defaultMode="mql" execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>TechnicalFlow</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="explorer">
+                <explorerView>
+                    <rightPanel>
+                        <explorerQueryPage searchLabel="Select a BusinessProcess to see all its steps ">
+                            <!-- Libellé qui s'affichera à droite -->
+                            <queryDefinition>
+                                <parameters>
+                                    <nodeParameter id="artKey">
+                                        <parameter id="artKey" value="key" />
+                                    </nodeParameter>
+                                </parameters>
+                                <query>
+                                    <simpleQuery>
+                                        <from>."@artKey"</from>
+                                        <follow>TechnicalFlow>>*>>LogicalFlow;LogicalFlow>>has for target>>Application;Application>>used by>>MacroBusinessProcess</follow>
+                                        <return>*>>*>>*</return>
+                                        <!--si je retourne les relations uniquement, les applications sans flux ne seront pas affichées-->
+                                    </simpleQuery>
+                                </query>
+                            </queryDefinition>
+                            <result defaultMode="graph">
+                                <graphView defaultMode="hierarchical">
+                                    <hierarchicalRendering orientation="DU">
+                                        <rootsFetchingQuery>
+                                            <query>
+                                                <simpleQuery>
+                                                    <from>."@artKey"</from>
+                                                    <return>*</return>
+                                                </simpleQuery>
+                                            </query>
+                                        </rootsFetchingQuery>
+                                    </hierarchicalRendering>
+                                </graphView>
+                            </result>
+                        </explorerQueryPage>
+                    </rightPanel>
+                </explorerView>
+            </result>
+        </queryPage>
+        <queryPage id="MktPlace-ventesCommandes" label="Flux Marketplace Ventes/commandes">
+            <queryDefinition execute="true" defaultMode="mql" visibility="hidden">
+                <query>
+                    <simpleQuery>
+                        <from>."AB132200-3552-4859-9EBC-655A44BB3ACF"</from>
+                        <follow>Partner>>uses>>.A4D78E17-8D0E-4163-B868-5E4D5077BECD;MacroApplication,Application,PartnerApplication,Partner>>is source of>>.12B0F0B8-73D2-49F0-A552-34D8CA7203B2,.AA7087B0-4BAA-4FEB-A721-39FE8500962A,.91A99A2A-9295-4F51-9FF8-98371E4B1703,.050FBC6D-1A5F-4734-B269-DA48A0234BF9;LogicalFlow>>has for target>>MacroApplication,Application,PartnerApplication,Partner</follow>
+                        <return>*>>*>>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph">
+                <graphView defaultMode="hierarchical">
+                    <hierarchicalRendering orientation="LR">
+                        <rootsFetchingQuery>
+                            <query>
+                                <simpleQuery>
+                                    <from>."AB132200-3552-4859-9EBC-655A44BB3ACF"</from>
+                                    <return>*</return>
+                                </simpleQuery>
+                            </query>
+                        </rootsFetchingQuery>
+                    </hierarchicalRendering>
+                </graphView>
+            </result>
+        </queryPage>
+        <queryPage id="MktPlace-cataloguesTarifs" label="Flux Marketplace MktPlace-cataloguesTarifs">
+            <queryDefinition execute="true" defaultMode="mql" visibility="hidden">
+                <query>
+                    <simpleQuery>
+                        <from>."C24C55F2-0D0F-4CFF-BD2F-EA7EDDD0385A",."8158756E-98EC-424A-85D4-8DF15EF70734"</from>
+                        <follow>Activity>>uses>>Application;MacroApplication,Application,PartnerApplication,Partner>>is source of>>.B804628A-A46D-4715-9127-13614569C41D,.32817FC1-F426-4815-BC5B-1438A987BDC5,.01FB47DA-A2E6-4BB3-80D2-1F443B7D82F3;LogicalFlow>>has for target>>MacroApplication,Application,PartnerApplication,Partner;.A4D78E17-8D0E-4163-B868-5E4D5077BECD>>used by>>Partner</follow>
+                        <return>*>>*>>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph">
+                <graphView defaultMode="hierarchical">
+                    <hierarchicalRendering orientation="LR">
+                        <rootsFetchingQuery>
+                            <query>
+                                <simpleQuery>
+                                    <from>."C24C55F2-0D0F-4CFF-BD2F-EA7EDDD0385A"</from>
+                                    <return>*</return>
+                                </simpleQuery>
+                            </query>
+                        </rootsFetchingQuery>
+                    </hierarchicalRendering>
+                </graphView>
+            </result>
+        </queryPage>
+        <queryPage id="uncompleteFlows" label="flux incomplets">
+            <queryDefinition execute="true" defaultMode="mql" visibility="hidden">
+                <query>
+                    <queryOperation type="union">
+                        <queryOperation type="minus">
+                            <simpleQuery>
+                                <from>LogicalFlow</from>
+                                <return>*</return>
+                            </simpleQuery>
+                            <simpleQuery>
+                                <from>Application,MacroApplication,PartnerApplication,Partner</from>
+                                <follow>*>>is source of>>LogicalFlow</follow>
+                                <return>LogicalFlow</return>
+                            </simpleQuery>
+                        </queryOperation>
+                        <queryOperation type="minus">
+                            <simpleQuery>
+                                <from>LogicalFlow</from>
+                                <return>*</return>
+                            </simpleQuery>
+                            <simpleQuery>
+                                <from>Application,MacroApplication,PartnerApplication,Partner</from>
+                                <follow>*>>is target of>>LogicalFlow</follow>
+                                <return>LogicalFlow</return>
+                            </simpleQuery>
+                        </queryOperation>
+                    </queryOperation>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph"></result>
+        </queryPage>
+        <queryPage id="application-explorer" label="Application">
+            <queryDefinition execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>Application</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="explorer"></result>
+        </queryPage>
+        <queryPage id="application-byEntrypoint" label="Application">
+            <queryDefinition execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>.28D10E0E-8AF9-4482-8405-AB39E19CDFF8,.3DAE0432-521C-44D3-BB5D-95FA9A5217B0</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="explorer">
+                <explorerView>
+                    <leftPanel>
+                        <traversal>
+                            <follow>.28D10E0E-8AF9-4482-8405-AB39E19CDFF8,.3DAE0432-521C-44D3-BB5D-95FA9A5217B0>>uses>>*</follow>
+                        </traversal>
+                    </leftPanel>
+                </explorerView>
+            </result>
+        </queryPage>
+        <queryPage id="application-byVendor" label="Application">
+            <queryDefinition execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>Vendor</from>
+                        <follow>Vendor>>provides>>Application</follow>
+                        <return>Vendor>>provides>>Application</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph"></result>
+        </queryPage>
+        <queryPage id="application-table" label="Application">
+            <queryDefinition execute="true" visibility="none">
+                <query>
+                    <simpleQuery>
+                        <from>Application</from>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="table">
+                <tableView>
+                    <metadataColumns>
+                        <targetMetaColumns>
+                            <metaColumn meta="contractScope" cssClass="meta_metaAvg" selectable="true" displayDefault="true" />
+                            <metaColumn meta="description" cssClass="meta_metaBig" selectable="true" displayDefault="true" />
+                            <metaColumn meta="serviceLevelAgreement" cssClass="meta_metaAvg" selectable="true" displayDefault="true" />
+                            <metaColumn meta="statut" cssClass="meta_metaAvg" selectable="true" displayDefault="true" />
+                            <metaColumn meta="applicationType" cssClass="meta_metaAvg" selectable="true" displayDefault="true" />
+                            <metaColumn meta="location" cssClass="meta_metaAvg" selectable="true" displayDefault="true" />
+                        </targetMetaColumns>
+                    </metadataColumns>
+                </tableView>
+            </result>
+        </queryPage>
+        <queryPage id="blankreq" label="Requêter à partir de cet artefact">
+            <queryDefinition execute="false" defaultMode="mql" visibility="visible">
+                <parameters>
+                    <nodeParameter id="art-param" label="param artefact 1">
+                        <parameter id="artefactKey" value="key" />
+                    </nodeParameter>
+                </parameters>
+                <query>
+                    <simpleQuery>
+                        <from>."@artefactKey"</from>
+                        <follow></follow>
+                        <return>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+        </queryPage>
+        <queryPage id="seeShippedLogicalFlows" label="Voir les flux logiques véhiculés">
+            <queryDefinition execute="true" defaultMode="mql" visibility="hidden">
+                <parameters>
+                    <nodeParameter id="art-param" label="param artefact 1">
+                        <parameter id="artefactKey" value="key" />
+                    </nodeParameter>
+                </parameters>
+                <query>
+                    <simpleQuery>
+                        <from>."@artefactKey"</from>
+                        <follow>."@artefactKey">>ships>>LogicalFlow;."@artefactKey">>*>>TechnicalFlow;TechnicalFlow>>*>>LogicalFlow;LogicalFlow>>has for target,has for source>>MacroApplication,Application,PartnerApplication,Partner</follow>
+                        <return>LogicalFlow>>has for target,has for source>>MacroApplication,Application,PartnerApplication,Partner</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph"/>
+        </queryPage>
+        <queryPage id="seeFlowsAndPartners" label="Voir les flux logiques et les partenaires">
+            <queryDefinition execute="true" defaultMode="mql" visibility="hidden">
+                <parameters>
+                    <nodeParameter id="art-param" label="param artefact 1">
+                        <parameter id="artefactKey" value="key" />
+                    </nodeParameter>
+                </parameters>
+                <query>
+                    <simpleQuery>
+                        <from>."@artefactKey"</from>
+                        <follow>."@artefactKey">>*>>LogicalFlow;LogicalFlow>>*>>MacroApplication,Application,PartnerApplication,Partner</follow>
+                        <return>*>>*>>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph"/>
+        </queryPage>
+        <queryPage id="seeTechnicalFlows" label="Voir les flux techniques associés">
+            <queryDefinition execute="true" defaultMode="mql" visibility="hidden">
+                <parameters>
+                    <nodeParameter id="art-param" label="param artefact 1">
+                        <parameter id="artefactKey" value="key" />
+                    </nodeParameter>
+                </parameters>
+                <query>
+                    <simpleQuery>
+                        <from>."@artefactKey"</from>
+                        <follow>LogicalFlow>>composed of>>TechnicalFlow;TechnicalFlow>>has for target,has for source>>*</follow>
+                        <return>TechnicalFlow>>has for target,has for source>>*</return>
+                    </simpleQuery>
+                </query>
+            </queryDefinition>
+            <result defaultMode="graph">
+                <graphView defaultMode="hierarchical">
+                    <hierarchicalRendering orientation="LR">
+                        <rootsFetchingQuery>
+                            <query>
+                                <simpleQuery>
+                                    <from>."@artefactKey"</from>
+                                    <follow>*>>has for source>>*</follow>
+                                    <return>Application,Partner,PartnerApplication,MacroApplication</return>
+                                </simpleQuery>
+                            </query>
+                        </rootsFetchingQuery>
+                    </hierarchicalRendering>
+                </graphView>
+            </result>
+        </queryPage>
+    </queryPages>
+    <defaultSettings>
+        <explorerViewSettings>
+            <leftPanelInfos>
+                <metaInfo meta="nbRels"
+					types="*" />
+            </leftPanelInfos>
+        </explorerViewSettings>
+        <tableViewSettings>
+            <metadataColumns>
+                <targetMetaColumns>
+                    <metaColumn meta="nbRels" cssClass="meta_metaSmall" selectable="true" displayDefault="true" />
+                    <metaColumn meta="statut" cssClass="meta_metaSmall" selectable="true" displayDefault="true" />
+                </targetMetaColumns>
+            </metadataColumns>
+        </tableViewSettings>
+        <fullTextViewSettings displayFragments="false" preloadMatches="false"></fullTextViewSettings>
+    </defaultSettings>
+    <metamodel>
+        <scopes>
+            <scope id="carto" label="Cartographie" guiUpdate="full" keyAttributionMode="uuidBased">
+                <metamodelPart id="metier" label="Métier">
+                    <edgeTypes>
+                        <edgeType outgoing="uses" incoming="used by" />
+                        <edgeType outgoing="contains" incoming="contained by" />
+                        <edgeType outgoing="is before" incoming="is after" />
+                        <edgeType outgoing="has action on" incoming="is acted by" />
+                        <edgeType outgoing="serves" incoming="served by" />
+                        <edgeType outgoing="provides" incoming="provided by" />
+                        <edgeType outgoing="has for target" incoming="is target of" />
+                        <edgeType outgoing="is source of" incoming="has for source" />
+                        <edgeType outgoing="composed of" incoming="composes" />
+                        <edgeType outgoing="starts with" incoming="is started by" />
+                        <edgeType outgoing="calls" incoming="is called by" />
+                        <edgeType outgoing="performs" incoming="is performed by" />
+                        <edgeType outgoing="ships" incoming="shipped by" />
+                        <edgeType outgoing="is accountable of" incoming="has for accountable" />
+                        <edgeType outgoing="is responsible of" incoming="has for responsible" />
+                        <edgeType outgoing="is support of" incoming="has for support" />
+                        <edgeType outgoing="is contributor of" incoming="has for contributor" />
+                        <edgeType outgoing="is informed of" incoming="has for informed" />
+                    </edgeTypes>
+                    <nodeTypes>
+                        <nodeType id="ValueStream">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="businessID" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="ValueStream" types="is before" />
+                                <outgoingEdgeType targetNodeTypes="MacroBusinessProcess" types="contains, starts with" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="MacroBusinessProcess">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="businessID" />
+                                <metadata id="orderNumber" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="MacroBusinessProcess" types="is before" />
+                                <outgoingEdgeType targetNodeTypes="BusinessProcess" types="is before, contains" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication" types="uses" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="BusinessProcess">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="businessID" />
+                                <metadata id="orderNumber" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Activity" types="contains, starts with" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,PartnerApplication,Partner" types="uses" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Activity">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="activityType" >
+                                    <allowedValues>
+                                        <value>Interaction IHM</value>
+                                        <value>Automatisation</value>
+                                        <value>Processus</value>
+                                    </allowedValues>
+                                </metadata>
+                                <metadata id="periodicity" >
+                                    <allowedValues>
+                                        <value>Toutes les nuits</value>
+                                        <value>Durant la nuit</value>
+                                        <value>Dans l'heure</value>
+                                    </allowedValues>
+                                </metadata>
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Activity" types="is before">
+                                    <metadatas>
+                                        <metadata id="LogicalFlow" />
+                                    </metadatas>
+                                </outgoingEdgeType>
+                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="has action on" />
+                                <outgoingEdgeType targetNodeTypes="BusinessProcess" types="calls" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication" types="uses" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Role">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Activity" types="performs" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="BusinessObject">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="protectionLevelID" />
+                                <metadata id="dataOwner" />
+                                <metadata id="protectionLevel" />
+                                <metadata id="comments" />
+                            </metadatas>
+                        </nodeType>
+                        <nodeType id="DataSphere">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="status" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="contains" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Application">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="applicationType" />
+                                <metadata id="rasci" />
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="serviceLevelAgreement" />
+                                <metadata id="availability" />
+                                <metadata id="contractScope" />
+                                <metadata id="location" ></metadata>
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
+                                <outgoingEdgeType targetNodeTypes="BusinessObject,Application,MacroApplication,PartnerApplication" types="uses" >
+                                    <metadatas>
+                                        <metadata id="description" />
+                                    </metadatas>
+                                </outgoingEdgeType>
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="PartnerApplication">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
+                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" >
+                                    <metadatas>
+                                        <metadata id="description" />
+                                    </metadatas>
+                                </outgoingEdgeType>
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Middleware">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="applicationType" />
+                                <metadata id="rasci" />
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="serviceLevelAgreement" />
+                                <metadata id="availability" />
+                                <metadata id="contractScope" />
+                                <metadata id="location" />
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of,ships" />
+                                <outgoingEdgeType targetNodeTypes="LogicalFlow" types="ships" />
+                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="File" types="contains" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="MacroApplication">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="applicationType" />
+                                <metadata id="rasci" />
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="serviceLevelAgreement" />
+                                <metadata id="availability" />
+                                <metadata id="contractScope" />
+                                <metadata id="location" />
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Application" types="contains" />
+                                <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,PartnerApplication" types="uses" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Vendor">
+                            <metadatas>
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,PartnerApplication,Middleware" types="provides" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Domain">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Application,MacroBusinessProcess,BusinessProcess,BusinessObject" types="is accountable of,is responsible of,is support of,is contributor of,is informed of" />
+                                <outgoingEdgeType targetNodeTypes="Domain" types="contains" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="LogicalFlow">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="frequency" />
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                                <metadata id="contact" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,Partner,PartnerApplication" types="has for target" />
+                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="composed of" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="TechnicalFlow">
+                            <metadatas>
+                                <metadata id="nameEN" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
+                                <metadata id="flowType">
+                                    <allowedValues>
+                                        <value>Stambia</value>
+                                        <value>ODI</value>
+                                        <value>PLSQL</value>
+                                        <value>MediaTransfer</value>
+                                        <value>Autre</value>
+                                    </allowedValues>
+                                </metadata>
+                                <metadata id="flowCode" description="code technique du flux,ex: code stambia ou ODI" />
+                                <metadata id="frequency"/>
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="MacroApplication,Application,Middleware,PartnerApplication,Partner,File" types="has for target" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="File">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="comments" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <!--
+                        <nodeType id="Table"><metadatas><metadata id="description" /><metadata id="comments" /></metadatas><outgoingEdgeTypes><outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of" /></outgoingEdgeTypes></nodeType>
+                        -->
+                        <nodeType id="Partner">
+                            <metadatas>
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                                <metadata id="description" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="PartnerApplication" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                    </nodeTypes>
+                </metamodelPart>
+                <override></override>
+            </scope>
+        </scopes>
+        <calculatedMetadatas>
+            <calculatedMetadata id="targetApp" calculateOnTypes="LogicalFlow,TechnicalFlow" name="targetApp" type="text">
+                <query>
+                    <simpleQuery>
+                        <follow>LogicalFlow>>has for target>>Application,MacroApplication,Partner,PartnerApplication,Middleware</follow>
+                        <return>Application,MacroApplication,Partner,PartnerApplication,Middleware,File</return>
+                    </simpleQuery>
+                    <operation>name</operation>
+                </query>
+            </calculatedMetadata>
+            <calculatedMetadata id="sourceApp" calculateOnTypes="LogicalFlow,TechnicalFlow" name="sourceApp" type="text">
+                <query>
+                    <simpleQuery>
+                        <follow>LogicalFlow>>has for source>>Application,MacroApplication,Partner,PartnerApplication,Middleware</follow>
+                        <return>Application,MacroApplication,Partner,PartnerApplication,Middleware,File</return>
+                    </simpleQuery>
+                    <operation>name</operation>
+                </query>
+            </calculatedMetadata>
+        </calculatedMetadatas>
+        <metadataCharacteristicsOverrides>
+            <nodeTypeRef id="*">
+                <metadataCharacteristicsOverride id="description" name="description" type="text" format="multiline" description="description" ></metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="descriptionEN" name="descriptionEN" type="text" format="multiline" description="english description" ></metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="comments" name="comments" type="text" format="multiline" description="Commentaires libres" ></metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="status" name="status" type="text" description="Statut de l'objet" >
+                    <allowedValues>
+                        <value>Initié</value>
+                        <value>A revoir</value>
+                        <value>Revu</value>
+                    </allowedValues>
+                </metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="orderNumber" name="orderNumber" type="numeric"   description="orderNumber" />
+                <metadataCharacteristicsOverride id="location" name="location" type="text"   description="Localisation">
+                    <allowedValues>
+                        <value>SI centralisé</value>
+                        <value>SI entrepôt</value>
+                        <value>Saas</value>
+                        <value>Caisse</value>
+                        <value>Terminal Denso</value>
+                        <value>Terminal MC3190</value>
+                        <value>Terminal Honeywell</value>
+                        <value>Smartphone Unitech PA760</value>
+                        <value>Smartphone J7</value>
+                        <value>Borne de comptage</value>
+                        <value>PDA MC33</value>
+                        <value>Autre</value>
+                    </allowedValues>
+                </metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="serviceLevelAgreement" name="serviceLevelAgreement" type="text"   description="serviceLevelAgreement">
+                    <allowedValues>
+                        <value>BASIC</value>
+                        <value>BRONZE</value>
+                        <value>SILVER</value>
+                        <value>GOLD</value>
+                    </allowedValues>
+                </metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="applicationType" name="applicationType" type="text"   description="L'application est-elle un développement spécifique ou un produit du marché?">
+                    <allowedValues>
+                        <value>Spécifique</value>
+                        <value>Produit du marché</value>
+                    </allowedValues>
+                </metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="linkToDocumentation"  name="linkToDocumentation" type="text" format="multiline" description="Where to find associated documentation" />
+                <metadataCharacteristicsOverride id="rasci"  name="rasci" type="text" format="multiline" description="Rôles et responsabilités" />
+                <metadataCharacteristicsOverride id="availability"  name="availability" type="text" description="Niveau de disponibilité">
+                    <allowedValues>
+                        <value>A1</value>
+                        <value>A2</value>
+                        <value>A3</value>
+                        <value>A4</value>
+                    </allowedValues>
+                </metadataCharacteristicsOverride>
+                <metadataCharacteristicsOverride id="contractScope"  name="contractScope" type="text" description="contractScope">
+                    <allowedValues>
+                        <value>GPC</value>
+                        <value>CGI</value>
+                    </allowedValues>
+                </metadataCharacteristicsOverride>
+            </nodeTypeRef>
+        </metadataCharacteristicsOverrides>
+        <nodeTypeGUICharacteristics>
+            <nodeTypeRefBases id="Activity" icon="Step.svg" color="#FFC107" />
+            <nodeTypeRefBases id="MacroApplication" icon="Application.svg" color="#01579b" />
+            <nodeTypeRefBases id="Middleware" icon="Connections.svg" color="#0097A7" />
+            <nodeTypeRefBases id="Application" icon="Application.svg" color="#0277BD" />
+            <nodeTypeRefBases id="Domain" icon="Group.svg" color="#007FFF" />
+            <nodeTypeRefBases id="BusinessObject" icon="Case.svg" color="#E91E63" />
+            <nodeTypeRefBases id="BusinessProcess" icon="Process.svg" color="#F54E1B" />
+            <nodeTypeRefBases id="DataSphere" icon="Package.svg" color="#BA184F" />
+            <nodeTypeRefBases id="LogicalFlow" icon="Flow.svg" color="#039BE5" />
+            <nodeTypeRefBases id="MacroBusinessProcess" icon="Node.svg" color="#E53935" />
+            <nodeTypeRefBases id="Role" icon="Role.svg" color="#FF8000" />
+            <nodeTypeRefBases id="TechnicalFlow" icon="Flow2.svg" color="#9e9e9e" />
+            <nodeTypeRefBases id="ValueStream" icon="Evolution.svg" color="#43A047" />
+            <nodeTypeRefBases id="Vendor" icon="Service.svg" color="#01579B" />
+            <nodeTypeRefBases id="Partner" icon="Handshake.svg" color="#00BCD4" />
+            <nodeTypeRefBases id="PartnerApplication" icon="PartnerApplication.svg" color="#2AA6A6" />
+            <!--<nodeTypeRefBases id="Table" icon="Table.svg" color="#9E9D24" />-->
+            <nodeTypeRefBases id="File" icon="File.svg" color="#C0CA33" />
+        </nodeTypeGUICharacteristics>
+    </metamodel>
+</hotReloadConfiguration>
