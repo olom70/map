@@ -3,7 +3,8 @@ from prompt_toolkit.validation import Validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 from prompt_toolkit import print_formatted_text, HTML, prompt
 # https://htmlcolorcodes.com/fr/noms-de-couleur/
-
+# https://python-prompt-toolkit.readthedocs.io/en/master/pages/getting_started.html
+from lib.tools import init
 
 def is_number(text):
     return text.isdigit()
@@ -38,6 +39,13 @@ def welcome():
     print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> - 3 : Remove the backup tables (a prompt will ask to confirm)</b></HotPink></aaa>'))
 
 def main():
+    INIFILE = 'map_indicator.py'
+    config = []
+    try:
+        config = init(inifile=INIFILE)
+    except:
+        print_formatted_text(HTML('<aaa bg="DarkRed"><Gold><b> Ini file {inifile} check KO. Please verify it exists and is well formed </b></Gold></aaa>'.format(inifile=INIFILE)))
+        exit()
     while True:
         welcome()
         try:
