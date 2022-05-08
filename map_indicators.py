@@ -4,7 +4,7 @@ from prompt_toolkit.shortcuts import yes_no_dialog
 from prompt_toolkit import print_formatted_text, HTML, prompt
 # https://htmlcolorcodes.com/fr/noms-de-couleur/
 # https://python-prompt-toolkit.readthedocs.io/en/master/pages/getting_started.html
-from lib.tools import init
+from lib.tools import check_ini_files_and_return_config_object
 
 def is_number(text):
     return text.isdigit()
@@ -42,7 +42,7 @@ def main():
     INIFILE = 'map_indicator.py'
     config = []
     try:
-        config = init(inifile=INIFILE)
+        config = check_ini_files_and_return_config_object(inifile=INIFILE)
     except:
         print_formatted_text(HTML('<aaa bg="DarkRed"><Gold><b> Ini file {inifile} check KO. Please verify it exists and is well formed </b></Gold></aaa>'.format(inifile=INIFILE)))
         exit()
