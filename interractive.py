@@ -123,3 +123,6 @@ select(l)
 myvar = 'content'
 print('content of variable {v.__name__} {v}'.format(v=myvar))
 # %%
+import datetime
+print(datetime.date.today())
+# %%
