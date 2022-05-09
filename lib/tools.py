@@ -27,7 +27,7 @@ def check_ini_files_and_return_config_object(inifile: str) -> list():
             and 'lastSessionIncrement' in config['Sessions']):
         return [config]
     else:
-        raise ValueError('ini file {inifile} not found'.format(inifile=inifile))
+        return None
 
 def create_main_variables_from_config(configinlist: list()) -> list():
     '''
@@ -47,40 +47,48 @@ def create_main_variables_from_config(configinlist: list()) -> list():
             e.g adm_user -> jules_adm_user
     '''
     #TODO : add a globa ltry / catch and return None for alla variables when an exception occurs
-    maindir, separator, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = str(), str(), str(), str(), str(), str()
-    retailers, toolkit_tables, tables = list(), list(), list()
-    retailers_tables = dict()
-    config = configinlist[0]
-    if (platform.system() == 'Linux'):
-        maindir = config['Sessions']['mainDirLinux']
-    else:
-        maindir = config['Sessions']['mainDirWindows']
+    try:
+        maindir, separator, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = str(), str(), str(), str(), str(), str()
+        retailers, toolkit_tables, tables = list(), list(), list()
+        retailers_tables = dict()
+        config = configinlist[0]
+        if (platform.system() == 'Linux'):
+            maindir = config['Sessions']['mainDirLinux']
+        else:
+            maindir = config['Sessions']['mainDirWindows']
 
-    if not file_exists_TrueFalse(head=maindir, tail='', typeExtraction='mainDir', dir='dir'):
-        raise ValueError('mainpath {mainDir} not found'.format(mainDir=maindir))    
+        if not file_exists_TrueFalse(head=maindir, tail='', typeExtraction='mainDir', dir='dir'):
+            raise ValueError('mainpath {mainDir} not found'.format(mainDir=maindir))    
 
-    iniFilesDir = maindir + os.path.sep + config['Sessions']['iniFilesDir']
-    if not file_exists_TrueFalse(head=iniFilesDir, tail='', typeExtraction='mainDir', dir='dir'):
-        raise ValueError('mainpath {iniFilesDir} not found'.format(mainDir=iniFilesDir))    
+        iniFilesDir = maindir + os.path.sep + config['Sessions']['iniFilesDir']
+        if not file_exists_TrueFalse(head=iniFilesDir, tail='', typeExtraction='mainDir', dir='dir'):
+            raise ValueError('mainpath {iniFilesDir} not found'.format(mainDir=iniFilesDir))    
 
-    separator = config['Sessions']['Separator']
-    retailers = config['Sessions']['retailers'].split()
-    tables = config['Sessions']['tables'].split()
-    toolkit_tables = config['Sessions']['toolkit_tables'].split()
-    dateOfLastSession = config['Sessions']['dateOfLastSession']
-    lastSessionIncrement = config['Sessions']['lastSessionIncrement']
-    file_ext = config['Sessions']['file_ext']
+        separator = config['Sessions']['Separator']
+        retailers = config['Sessions']['retailers'].split()
+        tables = config['Sessions']['tables'].split()
+        toolkit_tables = config['Sessions']['toolkit_tables'].split()
+        dateOfLastSession = config['Sessions']['dateOfLastSession']
+        lastSessionIncrement = config['Sessions']['lastSessionIncrement']
+        file_ext = config['Sessions']['file_ext']
 
-    for retailer in retailers:
-        retailer_tables = [ f'{retailer}{separator}{table}' for table in tables]
-        retailers_tables[retailer] = retailer_tables
-    
-    for retailer in retailers:
-        for table in retailers_tables[retailer]:
-            if not file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='retailersFiles', dir='file'):
-                raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
-    
-    return [maindir, separator, retailers, retailers_tables, toolkit_tables, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir]
+        for retailer in retailers:
+            retailer_tables = [ f'{retailer}{separator}{table}' for table in tables]
+            retailers_tables[retailer] = retailer_tables
+        
+        for retailer in retailers:
+            for table in retailers_tables[retailer]:
+                if not file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='retailersFiles', dir='file'):
+                    raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
+
+        return [maindir, separator, retailers, retailers_tables, toolkit_tables, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir]
+    except ValueError as vr:
+        print(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
+        return None, None, None, None, None, None, None, None
+    except BaseException as be:
+        print(f'Erreur inatendue dans la fonction create_main_variables_from_config() : {be.args}')
+        return None, None, None, None, None, None, None, None
+
 
 
 def initialize_db(db_full_path : str, config : list) -> list:

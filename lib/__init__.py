@@ -1,2 +1,2 @@
-from lib.tools import init, initialize_db
+from lib.tools import check_ini_files_and_return_config_object, initialize_db, create_main_variables_from_config
 from lib.fileutil import get_files, file_exists

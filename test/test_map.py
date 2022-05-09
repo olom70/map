@@ -13,15 +13,15 @@ from lib.tools import check_ini_files_and_return_config_object, initialize_db, c
 
 def init_ok():
     # Firstly, check if the inifile exists and has all the required keys
-    with raises(ValueError):
-        check_ini_files_and_return_config_object('wrong_name')
     config = check_ini_files_and_return_config_object('map_indicators.ini')[0]
+    assert isinstance(config, configparser.ConfigParser)
     assert 'DEFAULT' in config
     #Secondly, check if all the required files exists
     maindir, separator, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = str(), str(), str(), str(), str(), str()
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
     maindir, separator, retailers, retailers_tables, toolkit_tables, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = create_main_variables_from_config([config])
+    assert maindir is not None
     print('content of variable maindir : {v}'.format(v=maindir))
     assert len(maindir) > 0
     print('content of variable iniFilesDir : {v}'.format(v=iniFilesDir))
@@ -40,11 +40,10 @@ def init_ok():
     assert len(file_ext) > 0
 
     # Thirdly, load all the files in the database
-    conn = initialize_db(':memory', [config])[0]
+    conn = initialize_db(':memory:', [config])[0]
     cur = conn.cursor()
-    with not raises(OperationalError):
-        cur.execute("select * from path")
-        assert len(cur.fetchall()) > 0
+    cur.execute("select * from path")
+    assert len(cur.fetchall()) > 0
 
 if __name__=="__main__":
     init_ok()
