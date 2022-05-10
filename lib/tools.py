@@ -1,3 +1,4 @@
+from lib2to3.pytree import Base
 import os
 import datetime
 import platform
@@ -5,6 +6,7 @@ import configparser
 from prompt_toolkit import print_formatted_text, HTML, prompt
 import sqlite3
 from pandas import read_csv, DataFrame
+from glob import glob
 
 from pytest import Session
 from lib.fileutil import file_exists_TrueFalse
@@ -25,8 +27,9 @@ def check_ini_files_and_return_config_object(inifile: str) -> list():
             and len(config['Sessions']['tables']) > 0
             and len(config['Sessions']['toolkit_tables']) > 0
             and len(config['Sessions']['file_ext']) > 0
-            and 'dateOfLastSession' in config['Sessions']
-            and 'lastSessionIncrement' in config['Sessions']):
+            and len(config['Sessions']['prefix']) > 0
+            and len(config['Sessions']['context']) > 0
+            and len(config['Sessions']['backup_name']) > 0):
         return [config]
     else:
         return None
@@ -49,7 +52,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
             e.g adm_user -> jules_adm_user
     '''
     try:
-        maindir, separator, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = str(), str(), str(), str(), str(), str()
+        maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
         retailers, toolkit_tables, tables = list(), list(), list()
         retailers_tables = dict()
         config = configinlist[0]
@@ -69,9 +72,10 @@ def create_main_variables_from_config(configinlist: list()) -> list():
         retailers = config['Sessions']['retailers'].split()
         tables = config['Sessions']['tables'].split()
         toolkit_tables = config['Sessions']['toolkit_tables'].split()
-        dateOfLastSession = config['Sessions']['dateOfLastSession']
-        lastSessionIncrement = config['Sessions']['lastSessionIncrement']
         file_ext = config['Sessions']['file_ext']
+        prefix = config['Sessions']['prefix']
+        context = config['Sessions']['context']
+        backup_name = config['Sessions']['backup_name']
 
         # build the name of the tables for all retailers. e.g. jules_adm_role
         for retailer in retailers:
@@ -88,7 +92,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
             if not file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='toolkitFiles', dir='file'):
                     raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
 
-        return [maindir, separator, retailers, retailers_tables, toolkit_tables, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir]
+        return [maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name]
 
     except ValueError as vr:
         print(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
@@ -103,11 +107,11 @@ def initialize_db(db_full_path : str, variables_from_ini_in_list : list) -> list
     '''
         Load all the files in the database
     '''
-    maindir, separator, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = str(), str(), str(), str(), str(), str()
+    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
     try:
-        maindir, separator, retailers, retailers_tables, toolkit_tables, dateOfLastSession, lastSessionIncrement, file_ext, iniFilesDir = variables_from_ini_in_list
+        maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name = variables_from_ini_in_list
 
 
         df = DataFrame()
@@ -126,10 +130,38 @@ def initialize_db(db_full_path : str, variables_from_ini_in_list : list) -> list
                 df.to_sql(name=table, con=conn)
 
         return [conn]
-    except:
+    except BaseException as e:
         return None
 
 
-def backup_in_memory_db_to_disk(conn: sqlite3.connect, backup_full_path_name: str ) -> list():
+def get_current_session(maindir: str, prefix: str, context: str, separator: str) -> str:
+    '''
+        create the folder where all the files à the current execution will lies.
+        by default the format of the name of this folder is {prefix}{separator}{date|datetime}{Number of the session for this date/datetime}
+        e.g : Session-2022-05-10-1 or Session-2022-05-10 22:52:04.106532-1
+
+
+    '''
+    current_context = str(datetime.date.today() if context == 'date' else datetime.datetime.today())
+
+    path_to_create = None
+    try :
+        path_to_find = maindir + os.path.sep + prefix + separator + current_context 
+        returned_paths =  glob(path_to_find + '*', recursive=False)
+        if len(returned_paths) == 0:
+            path_to_create = current_context+separator+'1'
+            os.mkdir(path_to_create)
+        else:
+            sessions = list()
+            for path in returned_paths:
+                if os.path.isdir(path):
+                    sessions = sessions.append(int(path[path.rfind('-')+1:]))
+            path_to_create = current_context+separator+str((max(sessions)+1))
+            os.mkdir(path_to_create)
+        return path_to_create
+    except BaseException as e:
+        return None
+
+def backup_in_memory_db_to_disk(conn: sqlite3.connect, backup_full_path_name: str ) -> list:
     
     datetime.date.today()

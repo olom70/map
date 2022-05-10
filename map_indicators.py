@@ -1,10 +1,11 @@
+import configparser
 from sys import exit
 from prompt_toolkit.validation import Validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 from prompt_toolkit import print_formatted_text, HTML, prompt
 # https://htmlcolorcodes.com/fr/noms-de-couleur/
 # https://python-prompt-toolkit.readthedocs.io/en/master/pages/getting_started.html
-from lib.tools import check_ini_files_and_return_config_object
+from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config
 
 def is_number(text):
     return text.isdigit()
@@ -40,12 +41,22 @@ def welcome():
 
 def main():
     INIFILE = 'map_indicator.py'
-    config = []
-    try:
-        config = check_ini_files_and_return_config_object(inifile=INIFILE)
-    except:
-        print_formatted_text(HTML('<aaa bg="DarkRed"><Gold><b> Ini file {inifile} check KO. Please verify it exists and is well formed </b></Gold></aaa>'.format(inifile=INIFILE)))
+    config = configparser.ConfigParser()
+    config = check_ini_files_and_return_config_object(inifile=INIFILE)[0]
+    if 'Session' not in config:
         exit()
+    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
+    retailers, toolkit_tables = list(), list()
+    retailers_tables = dict()
+    
+    maindir, separator, retailers, retailers_tables, toolkit_tables, 
+    file_ext, iniFilesDir, prefix, context,
+    backup_name = create_main_variables_from_config([config])
+    
+    if maindir is None:
+        exit()
+
+
     while True:
         welcome()
         try:
