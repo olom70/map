@@ -56,7 +56,7 @@ def init_ok():
     
     current_session = get_current_session(maindir, prefix, context, separator)
     assert current_session is not None
-    print('content of variable backup_name : {v}'.format(v=backup_name))
+    print('content of variable current_session : {v}'.format(v=current_session))
 
     # backup_full_path_name = 'map.db' #TODO create the right name with datetime.date.today() and the session number
     # conn_backup = backup_in_memory_db_to_disk(conn=conn, backup_full_path_name=backup_full_path_name)[0]

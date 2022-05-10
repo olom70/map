@@ -149,14 +149,15 @@ def get_current_session(maindir: str, prefix: str, context: str, separator: str)
         path_to_find = maindir + os.path.sep + prefix + separator + current_context 
         returned_paths =  glob(path_to_find + '*', recursive=False)
         if len(returned_paths) == 0:
-            path_to_create = current_context+separator+'1'
+            path_to_create = path_to_find+separator+'1'
             os.mkdir(path_to_create)
         else:
             sessions = list()
             for path in returned_paths:
                 if os.path.isdir(path):
-                    sessions = sessions.append(int(path[path.rfind('-')+1:]))
-            path_to_create = current_context+separator+str((max(sessions)+1))
+                    pos = path.rfind(separator)+1
+                    sessions.append(int(path[pos:]))
+            path_to_create = path_to_find+separator+str((max(sessions)+1))
             os.mkdir(path_to_create)
         return path_to_create
     except BaseException as e:
