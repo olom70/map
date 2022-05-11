@@ -58,8 +58,8 @@ def init_ok():
     assert current_session is not None
     print('content of variable current_session : {v}'.format(v=current_session))
 
-    # backup_full_path_name = 'map.db' #TODO create the right name with datetime.date.today() and the session number
-    # conn_backup = backup_in_memory_db_to_disk(conn=conn, backup_full_path_name=backup_full_path_name)[0]
+    # backup_full_path_name = current_session + backup_name
+    # conn_backup = conn.backup()
     # assert conn_backup is not None
     # cur_backup = conn_backup.cursor()
     # cur_backup.execute("select * from path")
