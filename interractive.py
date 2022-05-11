@@ -123,3 +123,27 @@ select(l)
 myvar = 'content'
 print('content of variable {v.__name__} {v}'.format(v=myvar))
 # %%
+import datetime
+print(datetime.datetime.today())
+# %%
+context = 'datetime'
+current_context = datetime.date.today() if context == 'date' else datetime.datetime.today()
+print(current_context)
+# %%
+var = '/path/to/Session-2022-05-14-14'
+session = var[var.rfind('-')+1:]
+print(session)
+# %%
+returned_paths = ['/path/to/Session-2022-05-14-14', '/path/to/Session-2022-05-14-2']
+current_context = str(datetime.date.today() if context == 'date' else datetime.datetime.today())
+separator = '-'
+sessions = [1]
+for path in returned_paths:
+    sessions.append(int(path[path.rfind('-')+1:]))
+x = max(sessions)
+path_to_create = current_context+separator+str((max(sessions)+1))
+print(path_to_create)
+print(sessions)
+print(x)
+
+# %%
