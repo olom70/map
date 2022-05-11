@@ -163,6 +163,19 @@ def get_current_session(maindir: str, prefix: str, context: str, separator: str)
     except BaseException as e:
         return None
 
-def backup_in_memory_db_to_disk(conn: sqlite3.connect, backup_full_path_name: str ) -> list:
-    
-    datetime.date.today()
+def progress(status, remaining, total):
+    #TODO : loguer au lieu d'utiliser print
+    print(f'Status of operation : {status}')
+    print(f'Copied {total-remaining} of {total} pages...')
+
+def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str ) -> list:
+    '''
+        Backup the sqlite db in the specified path
+    '''
+    try:
+        conn_backup = sqlite3.connect(backup_full_path_name)
+        with conn_backup:
+            conn_in_list[0].backup(conn_backup, progress=progress)
+        return [conn_backup]
+    except BaseException as e:
+        return None

@@ -7,6 +7,16 @@ from prompt_toolkit import print_formatted_text, HTML, prompt
 # https://python-prompt-toolkit.readthedocs.io/en/master/pages/getting_started.html
 from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config
 
+
+def is_ync(text):
+    return (text=='y' or text =='n' or text == 'c')
+
+validator_yn = Validator.from_callable(
+    is_ync,
+    error_message="enter (y)es; (n)o, (c)ancel",
+    move_cursor_to_end=True)
+
+
 def is_number(text):
     return text.isdigit()
 
@@ -29,6 +39,10 @@ def process(digit: int):
             if am_I_ok:
                 print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> OK! importing.</b></HotPink></aaa>'))
 
+def are_all_files_ok():
+    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> Welcome to the CGI MAP Janitor ! The indicator provider :</b></HotPink></aaa>'))
+    print_formatted_text(HTML('<aaa bg="DarkRed"><Green><b> Are all the files ready ? (y/n) :</b></Green></aaa>'))
+
 def welcome():
     print_formatted_text(HTML('<b>---------------------------------</b>'))
     print_formatted_text(HTML('<b>CGI MAP : Generate the indicators</b>'))
@@ -40,22 +54,24 @@ def welcome():
     print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> - 3 : Remove the backup tables (a prompt will ask to confirm)</b></HotPink></aaa>'))
 
 def main():
-    INIFILE = 'map_indicator.py'
+    #TODO : pour les indicateurs utiliser la table user_map plutot que adm_user et adm_profile_user
+    #TODO : ajouter le logging
+    INIFILE = 'map_indicators.ini'
     config = configparser.ConfigParser()
     config = check_ini_files_and_return_config_object(inifile=INIFILE)[0]
-    if 'Session' not in config:
+    if 'Sessions' not in config:
         exit()
+
     maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
-    
-    maindir, separator, retailers, retailers_tables, toolkit_tables, 
-    file_ext, iniFilesDir, prefix, context,
-    backup_name = create_main_variables_from_config([config])
-    
+    variables_from_ini_in_list = create_main_variables_from_config([config])
+    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name = variables_from_ini_in_list
     if maindir is None:
         exit()
 
+    are_all_files_ok()
+    input = prompt('Your choice : (y/n/c) : ', validator=validator_yn)
 
     while True:
         welcome()

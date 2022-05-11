@@ -147,3 +147,15 @@ print(sessions)
 print(x)
 
 # %%
+from prompt_toolkit import print_formatted_text, HTML, prompt
+from prompt_toolkit.validation import Validator
+def is_ync(text):
+    return True if (text=='y' or text =='n' or text == 'c') else False
+
+validator_yn = Validator.from_callable(
+    is_ync,
+    error_message='enter (y)es; (n)o, (c)ancel',
+    move_cursor_to_end=True)
+
+inputt = prompt('Your choice : (y/n/c) : ')
+# %%

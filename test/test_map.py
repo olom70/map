@@ -8,7 +8,8 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 sys.path.append(PROJECT_ROOT)
 
 from pytest import raises
-from lib.tools import check_ini_files_and_return_config_object, initialize_db, create_main_variables_from_config, backup_in_memory_db_to_disk, get_current_session
+from lib.tools import check_ini_files_and_return_config_object, initialize_db
+from lib.tools import create_main_variables_from_config, backup_in_memory_db_to_disk, get_current_session
 
 
 def init_ok():
@@ -58,12 +59,13 @@ def init_ok():
     assert current_session is not None
     print('content of variable current_session : {v}'.format(v=current_session))
 
-    # backup_full_path_name = current_session + backup_name
-    # conn_backup = conn.backup()
-    # assert conn_backup is not None
-    # cur_backup = conn_backup.cursor()
-    # cur_backup.execute("select * from path")
-    # assert len(cur_backup.fetchall()) > 0
+    backup_full_path_name = current_session + os.path.sep + backup_name
+      
+    conn_backup = backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
+    cur_backup = conn_backup.cursor()
+    cur_backup.execute("select * from path")
+    assert len(cur_backup.fetchall()) > 0
+    conn_backup.close()
 
 
 
