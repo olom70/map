@@ -10,7 +10,7 @@ sys.path.append(PROJECT_ROOT)
 from pytest import raises
 from lib.tools import check_ini_files_and_return_config_object, initialize_db
 from lib.tools import create_main_variables_from_config, backup_in_memory_db_to_disk, get_current_session
-
+import logging
 
 def init_ok():
     # Firstly, check if the inifile exists and has all the required keys
@@ -23,7 +23,7 @@ def init_ok():
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
-    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name = variables_from_ini_in_list
+    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     assert maindir is not None
     print('content of variable maindir : {v}'.format(v=maindir))
     assert len(maindir) > 0
@@ -45,9 +45,11 @@ def init_ok():
     assert len(context) > 0
     print('content of variable backup_name : {v}'.format(v=backup_name))
     assert len(backup_name) > 0
+    print('content of variable log_level : {v}'.format(v=log_level))
+    assert len(log_level) > 0
 
     #Thirdly, load all the files in the database
-    conn = initialize_db(':memory:', variables_from_ini_in_list)[0]
+    conn = initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
     assert conn is not None
     cur = conn.cursor()
     cur.execute("select * from path")
@@ -70,4 +72,17 @@ def init_ok():
 
 
 if __name__=="__main__":
+
+    logger = logging.getLogger('map indicator app')
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler('map_indicator.log')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    fh.setLevel(logging.DEBUG)
+    logger.info('Start of the test suite')
+
+
     init_ok()
+
+    fh.close

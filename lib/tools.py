@@ -1,4 +1,3 @@
-from lib2to3.pytree import Base
 import os
 import datetime
 import platform
@@ -7,10 +6,22 @@ from prompt_toolkit import print_formatted_text, HTML, prompt
 import sqlite3
 from pandas import read_csv, DataFrame
 from glob import glob
-
-from pytest import Session
+import logging
+import functools
 from lib.fileutil import file_exists_TrueFalse
 
+mlogger = logging.getLogger(__file__)
+
+def log_function_call(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        mlogger.info(f'Start of the function {func.__name__}')
+        response = func(*args)
+        mlogger.info(f'End of the function {func.__name__}')
+        return response
+    return wrapper
+
+@log_function_call
 def check_ini_files_and_return_config_object(inifile: str) -> list():
     '''
         check if the ini file is OK
@@ -20,20 +31,59 @@ def check_ini_files_and_return_config_object(inifile: str) -> list():
     config.read(inifile)
     if ('DEFAULT' in config
          and 'Sessions' in config
-            and len(config['Sessions']['mainDirLinux']) > 0
-            and len(config['Sessions']['mainDirWindows']) > 0
-            and len(config['Sessions']['iniFilesDir']) > 0
-            and len(config['Sessions']['SQLiteDB']) > 0
-            and len(config['Sessions']['tables']) > 0
-            and len(config['Sessions']['toolkit_tables']) > 0
-            and len(config['Sessions']['file_ext']) > 0
+            and len(config['DEFAULT']['mainDirLinux']) > 0
+            and len(config['DEFAULT']['mainDirWindows']) > 0
+            and len(config['DEFAULT']['iniFilesDir']) > 0
+            and len(config['DEFAULT']['SQLiteDB']) > 0
+            and len(config['DEFAULT']['tables']) > 0
+            and len(config['DEFAULT']['toolkit_tables']) > 0
+            and len(config['DEFAULT']['file_ext']) > 0
             and len(config['Sessions']['prefix']) > 0
             and len(config['Sessions']['context']) > 0
-            and len(config['Sessions']['backup_name']) > 0):
+            and len(config['Sessions']['backup_name']) > 0
+            and len(config['DEFAULT']['log_level'])
+            and (config['DEFAULT']['log_level'] == 'DEBUG'
+                    or config['DEFAULT']['log_level'] == 'INFO'
+                    or config['DEFAULT']['log_level'] == 'WARNING'
+                    or config['DEFAULT']['log_level'] == 'ERROR'
+                    or config['DEFAULT']['log_level'] == 'CRITICAL')):
         return [config]
     else:
+        if 'DEFAULT' not in config:
+            mlogger.critical('ini file lacks the DEFAULT section')
+        if 'Sessions' not in config:
+            mlogger.critical('ini file lacks the Sessions section')
+        if 'mainDirLinux' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry mainDirLinux in the DEFAULT section')
+        if 'mainDirWindows' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry mainDirWindows in the DEFAULT section')
+        if 'iniFilesDir' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry iniFilesDir in the DEFAULT section')
+        if 'SQLiteDB' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry SQLiteDB in the DEFAULT section')
+        if 'tables' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry tables in the DEFAULT section')
+        if 'toolkit_tables' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry toolkit_tables in the DEFAULT section')
+        if 'file_ext' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry file_ext in the DEFAULT section')
+        if 'prefix' not in config['Sessions']:
+            mlogger.critical('ini file lacks the entry prefix in the Sessions section')
+        if 'log_level' not in config['DEFAULT']:
+            mlogger.critical('ini file lacks the entry log_level in the DEFAULT section')
+        if 'context' not in config['Sessions']:
+            mlogger.critical('ini file lacks the entry context in the Sessions section')
+        if 'backup_name' not in config['Sessions']:
+            mlogger.critical('ini file lacks the entry backup_name in the Sessions section')
+        if (config['DEFAULT']['log_level'] == 'DEBUG'
+                    or config['DEFAULT']['log_level'] == 'INFO'
+                    or config['DEFAULT']['log_level'] == 'WARNING'
+                    or config['DEFAULT']['log_level'] == 'ERROR'
+                    or config['DEFAULT']['log_level'] == 'CRITICAL'):
+            mlogger.critical('the entry log_level is not amongst DEBUG, INFO, WARNING, ERROR, CRITICAL')
         return None
 
+@log_function_call
 def create_main_variables_from_config(configinlist: list()) -> list():
     '''
         from the ini file,  create all the variables and return them in a dictionary
@@ -52,7 +102,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
             e.g adm_user -> jules_adm_user
     '''
     try:
-        maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
+        maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
         retailers, toolkit_tables, tables = list(), list(), list()
         retailers_tables = dict()
         config = configinlist[0]
@@ -76,6 +126,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
         prefix = config['Sessions']['prefix']
         context = config['Sessions']['context']
         backup_name = config['Sessions']['backup_name']
+        log_level = config['Sessions']['log_level']
 
         # build the name of the tables for all retailers. e.g. jules_adm_role
         for retailer in retailers:
@@ -92,7 +143,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
             if not file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='toolkitFiles', dir='file'):
                     raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
 
-        return [maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name]
+        return [maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level]
 
     except ValueError as vr:
         print(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
@@ -102,18 +153,12 @@ def create_main_variables_from_config(configinlist: list()) -> list():
         return None, None, None, None, None, None, None, None
 
 
-
-def initialize_db(db_full_path : str, variables_from_ini_in_list : list) -> list:
+@log_function_call
+def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, toolkit_tables: str, file_ext: str, iniFilesDir: str) -> list:
     '''
         Load all the files in the database
     '''
-    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
-    retailers, toolkit_tables = list(), list()
-    retailers_tables = dict()
     try:
-        maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name = variables_from_ini_in_list
-
-
         df = DataFrame()
         conn = sqlite3.connect(db_full_path)
         for retailer in retailers:
@@ -133,7 +178,7 @@ def initialize_db(db_full_path : str, variables_from_ini_in_list : list) -> list
     except BaseException as e:
         return None
 
-
+@log_function_call
 def get_current_session(maindir: str, prefix: str, context: str, separator: str) -> str:
     '''
         create the folder where all the files à the current execution will lies.
@@ -168,6 +213,7 @@ def progress(status, remaining, total):
     print(f'Status of operation : {status}')
     print(f'Copied {total-remaining} of {total} pages...')
 
+@log_function_call
 def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str ) -> list:
     '''
         Backup the sqlite db in the specified path
