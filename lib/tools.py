@@ -16,7 +16,7 @@ def log_function_call(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         mlogger.info(f'Start of the function {func.__name__}')
-        response = func(*args)
+        response = func(*args, *kwargs)
         mlogger.info(f'End of the function {func.__name__}')
         return response
     return wrapper
@@ -76,11 +76,7 @@ def check_ini_files_and_return_config_object(inifile: str) -> list():
             mlogger.critical('ini file lacks the entry context in the Sessions section')
         if 'backup_name' not in config['Sessions']:
             mlogger.critical('ini file lacks the entry backup_name in the Sessions section')
-        if (config['DEFAULT']['log_level'] == 'DEBUG'
-                    or config['DEFAULT']['log_level'] == 'INFO'
-                    or config['DEFAULT']['log_level'] == 'WARNING'
-                    or config['DEFAULT']['log_level'] == 'ERROR'
-                    or config['DEFAULT']['log_level'] == 'CRITICAL'):
+        if (config['DEFAULT']['log_level'] not in ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')):
             mlogger.critical('the entry log_level is not amongst DEBUG, INFO, WARNING, ERROR, CRITICAL')
         return None
 
@@ -148,10 +144,10 @@ def create_main_variables_from_config(configinlist: list()) -> list():
         return [maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level]
 
     except ValueError as vr:
-        print(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
+        mlogger.critical(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
         return None, None, None, None, None, None, None, None
     except BaseException as be:
-        print(f'Erreur inatendue dans la fonction create_main_variables_from_config() : {be.args}')
+        mlogger.critical(f'Erreur inatendue dans la fonction create_main_variables_from_config() : {be.args}')
         return None, None, None, None, None, None, None, None
 
 
@@ -166,18 +162,19 @@ def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, too
         for retailer in retailers:
             for table in retailers_tables[retailer]:
                 file_to_load = iniFilesDir + os.path.sep + table + file_ext
-                print(f'loading {file_to_load}')
+                mlogger.info(f'loading {file_to_load}')
                 df = read_csv(file_to_load)
                 df.to_sql(name=table, con=conn)
 
         for table in toolkit_tables:
                 file_to_load = iniFilesDir + os.path.sep + table + file_ext
-                print(f'loading {file_to_load}')
+                mlogger.info(f'loading {file_to_load}')
                 df = read_csv(file_to_load)
                 df.to_sql(name=table, con=conn)
         mlogger.info('function initialize_db : execution OK. Returning connection object as expected')
         return [conn]
-    except BaseException as e:
+    except BaseException as be:
+        mlogger.critical(f'Erreur inatendue dans la fonction initialize_db() : {be.args}')
         return None
 
 @log_function_call
@@ -208,13 +205,13 @@ def get_current_session(maindir: str, prefix: str, context: str, separator: str)
             os.mkdir(path_to_create)
         mlogger.info(f'function get_current_session : execution OK. Returning path to create "{path_to_create}" as expected')
         return path_to_create
-    except BaseException as e:
+    except BaseException as be:
+        mlogger.critical(f'Erreur inatendue dans la fonction get_current_session() : {be.args}')
         return None
 
 def progress(status, remaining, total):
-    #TODO : loguer au lieu d'utiliser print
-    print(f'Status of operation : {status}')
-    print(f'Copied {total-remaining} of {total} pages...')
+    mlogger.info(f'Status of operation : {status}')
+    mlogger.info(f'Copied {total-remaining} of {total} pages...')
 
 @log_function_call
 def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str ) -> list:
@@ -227,5 +224,6 @@ def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str )
             conn_in_list[0].backup(conn_backup, progress=progress)
         mlogger.info('function backup_in_memory_db_to_disk : execution OK. Returning backup db connection as expected')
         return [conn_backup]
-    except BaseException as e:
+    except BaseException as be:
+        mlogger.critical(f'Erreur inatendue dans la fonction backup_in_memory_db_to_disk() : {be.args}')
         return None

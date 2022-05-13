@@ -19,34 +19,34 @@ def init_ok():
     assert 'DEFAULT' in config
 
     #Secondly, check if all the required files exists
-    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name = str(), str(), str(), str(), str(), str(), str()
+    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
     assert variables_from_ini_in_list is not None
     maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     assert maindir is not None
-    print('content of variable maindir : {v}'.format(v=maindir))
+    logger.info('content of variable maindir : {v}'.format(v=maindir))
     assert len(maindir) > 0
-    print('content of variable iniFilesDir : {v}'.format(v=iniFilesDir))
+    logger.info('content of variable iniFilesDir : {v}'.format(v=iniFilesDir))
     assert len(iniFilesDir) > 0
-    print('content of variable separator : {v}'.format(v=separator))
+    logger.info('content of variable separator : {v}'.format(v=separator))
     assert len(separator) > 0
-    print('content of variable retailers : {v}'.format(v=retailers))
+    logger.info('content of variable retailers : {v}'.format(v=retailers))
     assert len(retailers) > 0
-    print('content of variable retailers_tables : {v} '.format(v=retailers_tables))
+    logger.info('content of variable retailers_tables : {v} '.format(v=retailers_tables))
     assert len(retailers_tables) > 0
-    print('content of variable toolkit_tables : {v}'.format(v=toolkit_tables))
+    logger.info('content of variable toolkit_tables : {v}'.format(v=toolkit_tables))
     assert len(toolkit_tables) > 0
-    print('content of variable file_ext : {v}'.format(v=file_ext))
+    logger.info('content of variable file_ext : {v}'.format(v=file_ext))
     assert len(file_ext) > 0
-    print('content of variable prefix : {v}'.format(v=prefix))
+    logger.info('content of variable prefix : {v}'.format(v=prefix))
     assert len(prefix) > 0
-    print('content of variable context : {v}'.format(v=context))
+    logger.info('content of variable context : {v}'.format(v=context))
     assert len(context) > 0
-    print('content of variable backup_name : {v}'.format(v=backup_name))
+    logger.info('content of variable backup_name : {v}'.format(v=backup_name))
     assert len(backup_name) > 0
-    print('content of variable log_level : {v}'.format(v=log_level))
+    logger.info('content of variable log_level : {v}'.format(v=log_level))
     assert len(log_level) > 0
 
     #Thirdly, load all the files in the database
@@ -60,7 +60,7 @@ def init_ok():
     
     current_session = get_current_session(maindir, prefix, context, separator)
     assert current_session is not None
-    print('content of variable current_session : {v}'.format(v=current_session))
+    logger.info('content of variable current_session : {v}'.format(v=current_session))
 
     backup_full_path_name = current_session + os.path.sep + backup_name
       
@@ -86,4 +86,4 @@ if __name__=="__main__":
 
     init_ok()
 
-    fh.close
+    fh.close()

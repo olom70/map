@@ -1,14 +1,15 @@
 import configparser
 from sys import exit
+import logging
 from prompt_toolkit.validation import Validator
 from prompt_toolkit.shortcuts import yes_no_dialog
 from prompt_toolkit import print_formatted_text, HTML, prompt
 # https://htmlcolorcodes.com/fr/noms-de-couleur/
 # https://python-prompt-toolkit.readthedocs.io/en/master/pages/getting_started.html
-from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config
-import logging
+from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db
+from helpers import are_all_files_ok, validator, validator_yn, welcome, process
 
-logger = logging.getLogger('map indicator app')
+logger = logging.getLogger('map_indicator_app')
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler('map_indicator.log')
 fh.setLevel(logging.DEBUG)
@@ -16,74 +17,38 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-def is_ync(text):
-    return (text=='y' or text =='n' or text == 'c')
-
-validator_yn = Validator.from_callable(
-    is_ync,
-    error_message="enter (y)es; (n)o, (c)ancel",
-    move_cursor_to_end=True)
-
-
-def is_number(text):
-    return text.isdigit()
-
-validator = Validator.from_callable(
-    is_number,
-    error_message='This input contains non-numeric characters',
-    move_cursor_to_end=True)
-
-def process(digit: int): 
-    match digit:
-        case 0:
-            exit()
-        case 1:
-            print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> %s preparing...</b></HotPink></aaa>' % digit))
-        case 2:
-            am_I_ok = yes_no_dialog(
-                title='Head up !',
-                text='Are the input files ready ?"'
-            ).run()
-            if am_I_ok:
-                print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> OK! importing.</b></HotPink></aaa>'))
-
-def are_all_files_ok():
-    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> Welcome to the CGI MAP Janitor ! The indicator provider :</b></HotPink></aaa>'))
-    print_formatted_text(HTML('<aaa bg="DarkRed"><Green><b> Are all the files ready ? (y/n) :</b></Green></aaa>'))
-
-def welcome():
-    print_formatted_text(HTML('<b>---------------------------------</b>'))
-    print_formatted_text(HTML('<b>CGI MAP : Generate the indicators</b>'))
-    print_formatted_text(HTML('<b>---------------------------------</b>'))
-    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> Choose an Option :</b></HotPink></aaa>'))
-    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> - 0 : Quit</b></HotPink></aaa>'))
-    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> - 1 : prepare the files</b></HotPink></aaa>'))
-    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> - 2 : import the content</b></HotPink></aaa>'))
-    print_formatted_text(HTML('<aaa bg="LightYellow"><HotPink><b> - 3 : Remove the backup tables (a prompt will ask to confirm)</b></HotPink></aaa>'))
 
 def main():
     #TODO : pour les indicateurs utiliser la table user_map plutot que adm_user et adm_profile_user
-    #TODO : ajouter le logging
     logger.info('Start. Application is initializing')
     INIFILE = 'map_indicators.ini'
+    logger.info(f'The name of the ini file is {INIFILE}')
     config = configparser.ConfigParser()
-    config = check_ini_files_and_return_config_object(inifile=INIFILE)[0]
+    config = check_ini_files_and_return_config_object(INIFILE)[0]
     if 'Sessions' not in config:
         logger.critical(f'The ini file {INIFILE} is malformed or does not exists. Exiting the application')
         exit()
 
-    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str()
+    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
-    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name,log_level = variables_from_ini_in_list
-    if maindir is None:
+    if variables_from_ini_in_list is None:
         logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application')
         exit()
+    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     logger.setLevel(log_level)
 
     are_all_files_ok()
-    input = prompt('Your choice : (y/n/c) : ', validator=validator_yn)
+    input = prompt('Your choice : (y)es/ (c)ancel) : ', validator=validator_yn)
+    if input == 'c':
+        print_formatted_text(HTML(f'<aaa bg="LightYellow"><HotPink><b>Goodbye !</b></HotPink></aaa>'))
+        logger.info('User canceled the initialisation')
+        fh.close()
+        exit()
+
+    conn = initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
+
 
     while True:
         welcome()
