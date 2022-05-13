@@ -23,6 +23,7 @@ def init_ok():
     retailers, toolkit_tables = list(), list()
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
+    assert variables_from_ini_in_list is not None
     maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     assert maindir is not None
     print('content of variable maindir : {v}'.format(v=maindir))
@@ -73,13 +74,13 @@ def init_ok():
 
 if __name__=="__main__":
 
-    logger = logging.getLogger('map indicator app')
+    logger = logging.getLogger('map_indicator_app')
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler('map_indicator.log')
+    fh.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     logger.addHandler(fh)
-    fh.setLevel(logging.DEBUG)
     logger.info('Start of the test suite')
 
 

@@ -10,7 +10,7 @@ import logging
 import functools
 from lib.fileutil import file_exists_TrueFalse
 
-mlogger = logging.getLogger(__file__)
+mlogger = logging.getLogger('map_indicator_app.tools')
 
 def log_function_call(func):
     @functools.wraps(func)
@@ -47,6 +47,7 @@ def check_ini_files_and_return_config_object(inifile: str) -> list():
                     or config['DEFAULT']['log_level'] == 'WARNING'
                     or config['DEFAULT']['log_level'] == 'ERROR'
                     or config['DEFAULT']['log_level'] == 'CRITICAL')):
+        mlogger.info('function check_ini_files_and_return_config_object : execution OK. Returning config as expected')
         return [config]
     else:
         if 'DEFAULT' not in config:
@@ -143,6 +144,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
             if not file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='toolkitFiles', dir='file'):
                     raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
 
+        mlogger.info('function create_main_variables_from_config : execution OK. Returning the entries of the ini file as expected')
         return [maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level]
 
     except ValueError as vr:
@@ -173,7 +175,7 @@ def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, too
                 print(f'loading {file_to_load}')
                 df = read_csv(file_to_load)
                 df.to_sql(name=table, con=conn)
-
+        mlogger.info('function initialize_db : execution OK. Returning connection object as expected')
         return [conn]
     except BaseException as e:
         return None
@@ -204,6 +206,7 @@ def get_current_session(maindir: str, prefix: str, context: str, separator: str)
                     sessions.append(int(path[pos:]))
             path_to_create = path_to_find+separator+str((max(sessions)+1))
             os.mkdir(path_to_create)
+        mlogger.info(f'function get_current_session : execution OK. Returning path to create "{path_to_create}" as expected')
         return path_to_create
     except BaseException as e:
         return None
@@ -222,6 +225,7 @@ def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str )
         conn_backup = sqlite3.connect(backup_full_path_name)
         with conn_backup:
             conn_in_list[0].backup(conn_backup, progress=progress)
+        mlogger.info('function backup_in_memory_db_to_disk : execution OK. Returning backup db connection as expected')
         return [conn_backup]
     except BaseException as e:
         return None
