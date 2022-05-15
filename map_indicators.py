@@ -1,3 +1,4 @@
+# https://wesmckinney.com/book/preliminaries.html : Python for data analysis 3rd edition
 import configparser
 from sys import exit
 import logging
@@ -26,7 +27,7 @@ def main():
     config = configparser.ConfigParser()
     config = check_ini_files_and_return_config_object(INIFILE)[0]
     if 'Sessions' not in config:
-        logger.critical(f'The ini file {INIFILE} is malformed or does not exists. Exiting the application')
+        logger.critical(f'The ini file {INIFILE} is malformed or does not exists. Exiting the application. Check the logs')
         exit()
 
     maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
@@ -34,7 +35,7 @@ def main():
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
     if variables_from_ini_in_list is None:
-        logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application')
+        logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application. Check the logs')
         exit()
     maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     logger.setLevel(log_level)
@@ -48,6 +49,8 @@ def main():
         exit()
 
     conn = initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
+    if conn is None:
+        logger.critical('Initialisation of the databse failed. Exiting the application. Check the logs')
 
 
     while True:
@@ -61,6 +64,7 @@ def main():
         else:
             process(digit_input)
     print('GoodBye!')
+    fh.close()
 
 if __name__ == '__main__':
     main()

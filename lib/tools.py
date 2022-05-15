@@ -2,6 +2,7 @@ import os
 import datetime
 import platform
 import configparser
+from jsonschema import ValidationError
 from prompt_toolkit import print_formatted_text, HTML, prompt
 import sqlite3
 from pandas import read_csv, DataFrame
@@ -227,3 +228,25 @@ def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str )
     except BaseException as be:
         mlogger.critical(f'Erreur inatendue dans la fonction backup_in_memory_db_to_disk() : {be.args}')
         return None
+
+@log_function_call
+def get_queries(configinlist: list) -> dict:
+    '''
+        Load all the queries in a dictionary
+    '''
+    config = configinlist[0]
+    queries_in_a_dict = None
+    if 'Queries' in config:
+        if 'connected_at_least_once' in config['Queries']:
+            connected_at_least_once = config['Queries']['connected_at_least_once']
+            if len(connected_at_least_once) > 0:
+                queries_in_a_dict = {'connected_at_least_once': connected_at_least_once}
+            else:
+                mlogger.critical('entry connected_at_least_once is malformed')
+        else:
+            mlogger.critical('entry connected_at_least_once is missing')
+    else:
+        mlogger.critical('Section Queries does not exists')
+    return queries_in_a_dict
+
+
