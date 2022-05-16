@@ -1,4 +1,8 @@
 # https://wesmckinney.com/book/preliminaries.html : Python for data analysis 3rd edition
+# https://datatofish.com/sql-to-pandas-dataframe/
+# https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
+# https://datatofish.com/export-dataframe-to-excel/
+# https://xlsxwriter.readthedocs.io/example_pandas_column_formats.html#
 import configparser
 from sys import exit
 import logging

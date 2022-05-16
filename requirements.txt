@@ -10,6 +10,7 @@ debugpy==1.6.0
 decorator==5.1.1
 defusedxml==0.7.1
 entrypoints==0.4
+et-xmlfile==1.1.0
 executing==0.8.3
 fastjsonschema==2.15.3
 iniconfig==1.1.1
@@ -35,6 +36,7 @@ nbformat==5.4.0
 nest-asyncio==1.5.5
 notebook==6.4.11
 numpy==1.22.3
+openpyxl==3.0.9
 packaging==21.3
 pandas==1.4.2
 pandocfilters==1.5.0
@@ -70,3 +72,4 @@ traitlets==5.1.1
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.6.0
+XlsxWriter==3.0.3

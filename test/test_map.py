@@ -107,6 +107,4 @@ if __name__=="__main__":
     check_queries(conninlist, configinlist, backup_path)
 
 
-
-
     fh.close()
