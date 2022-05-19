@@ -2,7 +2,6 @@ import os
 import datetime
 import platform
 import configparser
-from jsonschema import ValidationError
 from prompt_toolkit import print_formatted_text, HTML, prompt
 import sqlite3
 from pandas import read_csv, DataFrame
