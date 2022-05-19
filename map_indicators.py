@@ -35,13 +35,13 @@ def main():
         exit()
 
     maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
-    retailers, toolkit_tables = list(), list()
+    tables, retailers, toolkit_tables = list(), list(), list()
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
     if variables_from_ini_in_list is None:
         logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application. Check the logs')
         exit()
-    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
+    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     logger.setLevel(log_level)
 
     are_all_files_ok()
