@@ -4,12 +4,13 @@ import configparser
 from sqlite3 import Connection, OperationalError
 import sqlite3
 import sys
+
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(PROJECT_ROOT)
 from pytest import raises
 from lib.tools import check_ini_files_and_return_config_object, initialize_db
 from lib.tools import create_main_variables_from_config, backup_in_memory_db_to_disk
-from lib.tools import get_current_session, get_queries
+from lib.tools import get_current_session, get_queries, brand_query
 import logging
 
 def init_ok():
@@ -20,11 +21,11 @@ def init_ok():
 
     #Secondly, check if all the required files exists
     maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
-    retailers, toolkit_tables = list(), list()
+    retailers, tables, toolkit_tables = list(), list(), list()
     retailers_tables = dict()
     variables_from_ini_in_list = create_main_variables_from_config([config])
     assert variables_from_ini_in_list is not None
-    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
+    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     assert maindir is not None
     logger.info('content of variable maindir : {v}'.format(v=maindir))
     assert len(maindir) > 0
@@ -34,6 +35,9 @@ def init_ok():
     assert len(separator) > 0
     logger.info('content of variable retailers : {v}'.format(v=retailers))
     assert len(retailers) > 0
+    logger.info('content of variable tables : {v} '.format(v=tables))
+    assert len(tables) > 0
+
     logger.info('content of variable retailers_tables : {v} '.format(v=retailers_tables))
     assert len(retailers_tables) > 0
     logger.info('content of variable toolkit_tables : {v}'.format(v=toolkit_tables))
@@ -62,7 +66,7 @@ def init_ok():
 
 def backup(conninlist: list, variables_from_ini_in_list: list) -> str:
     conn = conninlist[0]
-    maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
+    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
 
     # Time to save a backup of the database
     current_session = get_current_session(maindir, prefix, context, separator)
@@ -86,8 +90,11 @@ def check_queries(conninlist: list, configinlist: list, backup_path: str) -> Non
     all_queries_in_a_dict = dict()
     all_queries_in_a_dict =  get_queries(configinlist)
     assert all_queries_in_a_dict is not None
+    variables_from_ini_in_list = create_main_variables_from_config(configinlist)
+    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
+    branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once'], tables, 'jules', separator)
     cur = conninlist[0].cursor()
-    print(cur.execute(all_queries_in_a_dict['connected_at_least_once']).fetchall())
+    print(cur.execute(branded_query).fetchall())
 
 
 if __name__=="__main__":

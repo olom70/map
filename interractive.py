@@ -173,3 +173,45 @@ def ask_ok(prompt, retries=4, reminder='Please try again!'):
 
 ask_ok('?')
 # %%
+def decorate(arg1, arg2, arg3):
+    print ('Je suis dans la fonction "decorate".')
+    def decorated(func):
+        print ('Je suis dans la fonction "decorated".')
+        def wrapper(*args, **kwargs):
+            print ('Je suis dans la fonction "wrapper".')
+            print ("Les arguments du décorateurs sont : %s, %s, %s." % (arg1, arg2, arg3))
+            print ("Pré-traitement.")
+            print ("Exécution de la fonction %s." % func.__name__)
+            response = func(*args, **kwargs)
+            print ("Post-traitement.")
+            return response
+        return wrapper
+    return decorated
+
+@decorate("Arg 1", "Arg 2", "Arg 3")
+def foobar():
+    print ("Je suis foobar, je vous reçois 5 sur 5.")
+
+foobar()
+#%%
+tables = ['adm_user', 'adm_profile_user']
+tool_tables = ['user_acess', 'path']
+query = 'select * from adm_user join adm_profile_user on a=a where access = user_access.access_enseigne'
+brand = 'jules'
+separator = '_'
+
+def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
+    branded_tables = [ f'{brand}{separator}{table}' for table in tables ]
+    for r in zip(tables, branded_tables):
+        query = query.replace(*r)
+    branded_query = query.replace('$brand', brand)
+    return branded_query
+
+print(query)
+query = brand_query(query=query, tables=tables, brand=brand, separator=separator)
+print(query)
+#%%
+s = "The quick brown fox jumps over the lazy dog"
+for r in (("brown", "red"), ("lazy", "quick")):
+    s = s.replace(*r)
+print(s)

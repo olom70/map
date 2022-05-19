@@ -141,7 +141,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
                     raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
 
         mlogger.info('function create_main_variables_from_config : execution OK. Returning the entries of the ini file as expected')
-        return [maindir, separator, retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level]
+        return [maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level]
 
     except ValueError as vr:
         mlogger.critical(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
@@ -248,4 +248,17 @@ def get_queries(configinlist: list) -> dict:
         mlogger.critical('Section Queries does not exists')
     return queries_in_a_dict
 
+@log_function_call
+def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
+    '''
+    Turn the generic query returned in a query using the tables of a specific brand
+    e.g. : adm_profile -> jules_adm_profile
+    '''
+    mlogger.info(f'query received for input : {query}')
+    branded_tables = [ f'{brand}{separator}{table}' for table in tables ]
+    for r in zip(tables, branded_tables):
+        query = query.replace(*r)
+    branded_query = query.replace('$brand', brand)
+    mlogger.info(f'branded query returned : {branded_query}')
+    return branded_query
 
