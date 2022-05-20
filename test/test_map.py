@@ -17,7 +17,7 @@ def init_ok():
     # Firstly, check if the inifile exists and has all the required keys
     config = check_ini_files_and_return_config_object('map_indicators.ini')[0]
     assert isinstance(config, configparser.ConfigParser)
-    assert 'DEFAULT' in config
+    assert 'Main' in config
 
     #Secondly, check if all the required files exists
     maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
@@ -69,8 +69,9 @@ def backup(conninlist: list, variables_from_ini_in_list: list) -> str:
     maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
 
     # Time to save a backup of the database
-    current_session = get_current_session(maindir, prefix, context, separator)
+    current_session, current_date = get_current_session(maindir, prefix, context, separator)
     assert current_session is not None
+    assert current_date is not None
     logger.info('content of variable current_session : {v}'.format(v=current_session))
 
     backup_full_path_name = current_session + os.path.sep + backup_name
@@ -94,8 +95,9 @@ def check_queries(conninlist: list, configinlist: list, backup_path: str) -> Non
     maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
     branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once'], tables, 'jules', separator)
     cur = conninlist[0].cursor()
-    print(cur.execute(branded_query).fetchall())
-
+    assert len(cur.execute(branded_query).fetchall()) > 0
+    branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], tables, 'jules', separator)
+    assert len(cur.execute(branded_query).fetchall()) > 0
 
 if __name__=="__main__":
 

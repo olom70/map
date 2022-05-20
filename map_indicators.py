@@ -3,6 +3,8 @@
 # https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
 # https://datatofish.com/export-dataframe-to-excel/
 # https://xlsxwriter.readthedocs.io/example_pandas_column_formats.html#
+# https://www.easytweaks.com/bar-plot-python-pandas-dataframe-example/
+# https://www.easytweaks.com/python-legend-plot-example/
 import configparser
 from sys import exit
 import logging
@@ -24,7 +26,6 @@ logger.addHandler(fh)
 
 
 def main():
-    #TODO : pour les indicateurs utiliser la table user_map plutot que adm_user et adm_profile_user
     logger.info('Start. Application is initializing')
     INIFILE = 'map_indicators.ini'
     logger.info(f'The name of the ini file is {INIFILE}')

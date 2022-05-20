@@ -3,36 +3,24 @@ import configparser
 import os
 
 from openpyxl import Workbook
-from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, get_current_session, get_queries
+from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, get_current_session, get_queries, brand_query
 INIFILE = 'map_indicators.ini'
 config = configparser.ConfigParser()
 config = check_ini_files_and_return_config_object(INIFILE)[0]
 variables_from_ini_in_list = create_main_variables_from_config([config])
 maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
 conn = initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
-backup_path = get_current_session(maindir, prefix, context, separator) + os.path.sep
+backup_path, current_date = get_current_session(maindir, prefix, context, separator)
+backup_path = backup_path+ os.path.sep
 all_queries_in_a_dict =  get_queries([config])
-
-print(retailers_tables)
-
-
 
 
 # %%
 import pandas as pd
-
-def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
-    branded_tables = [ f'{brand}{separator}{table}' for table in tables ]
-    for r in zip(tables, branded_tables):
-        query = query.replace(*r)
-    branded_query = query.replace('enseigne', brand)
-    return branded_query
-brand='jules'
-branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once'], tables, brand, separator)
-print(branded_query)
+brand = 'jules'
+branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], tables, brand, separator)
 sql_query = pd.read_sql(branded_query, conn)
 df = pd.DataFrame(sql_query)
-print(df)
 print(f'df.index : {df.index}')
 print(f'df.columns : {df.columns}')
 
@@ -61,10 +49,19 @@ tab.tableStyleInfo = style
 ws.add_table(tab)
 wb.save(backup_path+'map2.xlsx')
 #%%
-df.plot.barh()
+import matplotlib.pyplot as plt
+df.plot.barh(stacked=True, x='Teams', title=f'{brand.capitalize()} : status of connections on {current_date}', figsize= (12,7), fontsize=13)
+plt.savefig(backup_path+'jules_connected.jpg')
+
 #%%
 df.assign(entreprise_team=df["entreprise"] + " " + df["team"]+ " " + df["connected_at_least_once"]).groupby(['entreprise_team']).sum().plot.barh()
 
 #%%
 print(df)
 df.groupby(['team']).sum()
+#%%
+for key,val in enumerate(config['Queries']):
+    print(f'{key} / {val}')
+
+for val in config['Queries']:
+    print(f"{val} : {config['Queries'][val]}")
