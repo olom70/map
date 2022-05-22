@@ -22,10 +22,11 @@ def log_function_call(func):
     return wrapper
 
 @log_function_call
-def check_ini_files_and_return_config_object(inifile: str) -> list():
+def check_ini_files_and_return_config_object(inifile: str) -> list:
     '''
         check if the ini file is OK
         if so, return the config object in a list
+        of not return None
     '''
     config = configparser.ConfigParser()
     config.read(inifile)
@@ -81,22 +82,10 @@ def check_ini_files_and_return_config_object(inifile: str) -> list():
         return None
 
 @log_function_call
-def create_main_variables_from_config(configinlist: list()) -> list():
+def create_main_variables_from_config(configinlist: list) -> tuple:
     '''
-        from the ini file,  create all the variables and return them in a dictionary
-        key                 : type of value         value
-        maindir             : string                mainDirWindows or mainDirLinux
-        separator           : string                separator
-        retailers           : list                  retailers
-        retailers_tables    : list of dictionary    [{retailer: list of tables}, {retailer : list of tables}]
-        toolkit_tables      : list                  toolkit_tables
-        dateOfLastSession   : string                dateOfLastSession
-        lastSessionIncrement: string                lastSessionIncrement
-        file_ext            : string                file_ext
-        iniFilesDir         : string                iniFilesDir
-
-        NB : list of tables is made up from all the tables from 'tables'. To each table a prefix is added : {retailer}{separator}.
-            e.g adm_user -> jules_adm_user
+        from the ini file,  create all the variables from the sections 'Main' and 'Sessions' and return them in a tuple
+        return a tuple of None in case of a problem
     '''
     try:
         maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
@@ -142,7 +131,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
                     raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
 
         mlogger.info('function create_main_variables_from_config : execution OK. Returning the entries of the ini file as expected')
-        return [maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level]
+        return maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level
 
     except ValueError as vr:
         mlogger.critical(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
@@ -156,6 +145,7 @@ def create_main_variables_from_config(configinlist: list()) -> list():
 def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, toolkit_tables: str, file_ext: str, iniFilesDir: str) -> list:
     '''
         Load all the files in the database
+        return a list with the connection object or None
     '''
     try:
         df = DataFrame()
@@ -179,11 +169,14 @@ def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, too
         return None
 
 @log_function_call
-def get_current_session(maindir: str, prefix: str, context: str, separator: str) -> str:
+def get_current_session(maindir: str, prefix: str, context: str, separator: str) -> tuple:
     '''
         create the folder where all the files à the current execution will lies.
         by default the format of the name of this folder is {prefix}{separator}{date|datetime}{Number of the session for this date/datetime}
         e.g : Session-2022-05-10-1 or Session-2022-05-10 22:52:04.106532-1
+
+        returns the full path and the session (that is a date)
+        returns None, None if a problem occurs
 
 
     '''
@@ -218,6 +211,7 @@ def progress(status, remaining, total):
 def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str ) -> list:
     '''
         Backup the sqlite db in the specified path
+        return de connection object in a list or None
     '''
     try:
         conn_backup = sqlite3.connect(backup_full_path_name)
@@ -232,7 +226,7 @@ def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str )
 @log_function_call
 def get_queries(configinlist: list) -> dict:
     '''
-        Load all the queries in a dictionary
+        Load all the queries in a dictionary or None
     '''
     try:
         config = configinlist[0]
@@ -253,6 +247,7 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
     '''
     Turn the generic query returned in a query using the tables of a specific brand
     e.g. : adm_profile -> jules_adm_profile
+    returns the query or None if a problem occurs
     '''
     mlogger.info(f'query received for input : {query}')
     try:
@@ -266,4 +261,3 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
     except BaseException as be:
         mlogger.critical(f'Erreur inatendue dans la fonction brand_query() : {be.args}')
         return None
-
