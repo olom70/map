@@ -234,15 +234,19 @@ def get_queries(configinlist: list) -> dict:
     '''
         Load all the queries in a dictionary
     '''
-    config = configinlist[0]
-    queries_in_a_dict = dict()
-    if 'Queries' in config:
-        for val in config['Queries']:
-            queries_in_a_dict[val] = config['Queries'][val]
-    else:
-        mlogger.critical('Section Queries does not exists')
+    try:
+        config = configinlist[0]
+        queries_in_a_dict = dict()
+        if 'Queries' in config:
+            for val in config['Queries']:
+                queries_in_a_dict[val] = config['Queries'][val]
+        else:
+            mlogger.critical('Section Queries does not exists')
+            return None
+        return queries_in_a_dict
+    except BaseException as be:
+        mlogger.critical(f'Erreur inatendue dans la fonction get_queries() : {be.args}')
         return None
-    return queries_in_a_dict
 
 @log_function_call
 def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
@@ -251,10 +255,15 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
     e.g. : adm_profile -> jules_adm_profile
     '''
     mlogger.info(f'query received for input : {query}')
-    branded_tables = [ f'{brand}{separator}{table}' for table in tables ]
-    for r in zip(tables, branded_tables):
-        query = query.replace(*r)
-    branded_query = query.replace('$brand', brand)
-    mlogger.info(f'branded query returned : {branded_query}')
-    return branded_query
+    try:
+        branded_tables = [ f'{brand}{separator}{table}' for table in tables ]
+        for r in zip(tables, branded_tables):
+            query = query.replace(*r)
+        query = query.replace(f'{brand}{separator}{brand}{separator}', brand+separator)
+        branded_query = query.replace('$brand', brand)
+        mlogger.info(f'branded query returned : {branded_query}')
+        return branded_query
+    except BaseException as be:
+        mlogger.critical(f'Erreur inatendue dans la fonction brand_query() : {be.args}')
+        return None
 

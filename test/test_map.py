@@ -98,6 +98,8 @@ def check_queries(conninlist: list, configinlist: list, backup_path: str) -> Non
     assert len(cur.execute(branded_query).fetchall()) > 0
     branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], tables, 'jules', separator)
     assert len(cur.execute(branded_query).fetchall()) > 0
+    branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, 'jules', separator)
+    assert len(cur.execute(branded_query).fetchall()) > 0
 
 if __name__=="__main__":
 
