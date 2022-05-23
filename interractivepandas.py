@@ -23,9 +23,23 @@ sql_query = pd.read_sql(branded_query, conn)
 df = pd.DataFrame(sql_query)
 print(f'df.index : {df.index}')
 print(f'df.columns : {df.columns}')
+df
+
+#%%
+branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, brand, separator)
+sql_query = pd.read_sql(branded_query, conn)
+dfrq = pd.DataFrame(sql_query)
+dfrq
+#%%
+
+dfrq.groupby(['team']).sum().plot.barh()
+dfrq.assign(entreprise_team=dfrq['entreprise'] + " / " + dfrq['team']).groupby(['entreprise_team']).sum().plot.barh()
 
 # %%
 df.to_excel(backup_path+"map.xlsx", index=False, sheet_name='connected_at_teast_once')
+sql_query = pd.read_sql(branded_query, conn)
+df = pd.DataFrame(sql_query)
+df
 
 #%%
 with pd.ExcelWriter(backup_path+'map.xlsx',
