@@ -26,14 +26,17 @@ print(f'df.columns : {df.columns}')
 df
 
 #%%
+import pandas as pd
+brand = 'jules'
+periods = pd.period_range("2022-03-14", "2022-05-22", freq="W")
 branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, brand, separator)
-sql_query = pd.read_sql(branded_query, conn)
+sql_query = pd.read_sql(branded_query, conn, parse_dates='access_date_to_path', index_col='access_date_to_path')
 dfrq = pd.DataFrame(sql_query)
-dfrq
 #%%
-
 dfrq.groupby(['team']).sum().plot.barh()
 dfrq.assign(entreprise_team=dfrq['entreprise'] + " / " + dfrq['team']).groupby(['entreprise_team']).sum().plot.barh()
+#%%
+dfrq.groupby('access_date_to_path').sum().plot.bar()
 
 # %%
 df.to_excel(backup_path+"map.xlsx", index=False, sheet_name='connected_at_teast_once')
