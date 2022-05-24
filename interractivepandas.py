@@ -1,4 +1,5 @@
 #%%
+from calendar import week
 import configparser
 import os
 
@@ -13,30 +14,75 @@ conn = initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, fi
 backup_path, current_date = get_current_session(maindir, prefix, context, separator)
 backup_path = backup_path+ os.path.sep
 all_queries_in_a_dict =  get_queries([config])
-
+#%%
+from lib.tools import backup_in_memory_db_to_disk
+backup_full_path_name = backup_path + backup_name
+conn_backup = backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
 
 # %%
 import pandas as pd
-brand = 'jules'
+brand = 'pimkie'
 branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], tables, brand, separator)
 sql_query = pd.read_sql(branded_query, conn)
 df = pd.DataFrame(sql_query)
 print(f'df.index : {df.index}')
 print(f'df.columns : {df.columns}')
 df
+#%%
+import matplotlib.pyplot as plt
+df.plot.barh(stacked=True, x='Teams', title=f'{brand.capitalize()} : status of connections on {current_date}', figsize= (12,7), fontsize=13)
+plt.savefig(backup_path+brand+separator+'connected.jpg')
 
 #%%
 import pandas as pd
-brand = 'jules'
+brand = 'pimkie'
 periods = pd.period_range("2022-03-14", "2022-05-22", freq="W")
 branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, brand, separator)
-sql_query = pd.read_sql(branded_query, conn, parse_dates='access_date_to_path', index_col='access_date_to_path')
+#sql_query = pd.read_sql(branded_query, conn, parse_dates='access_date_to_path', index_col='access_date_to_path')
+sql_query = pd.read_sql(branded_query, conn)
 dfrq = pd.DataFrame(sql_query)
+dfrq
 #%%
-dfrq.groupby(['team']).sum().plot.barh()
-dfrq.assign(entreprise_team=dfrq['entreprise'] + " / " + dfrq['team']).groupby(['entreprise_team']).sum().plot.barh()
+#dfrq.groupby('access_year_week').sum().plot.bar()
+#dfrq.assign(entreprise_team=dfrq['entreprise'] + " / " + dfrq['team']).groupby(['entreprise_team']).sum().plot.barh()
+#dfrq.groupby([dfrq['entreprise'], dfrq['team'], dfrq['access_year_week']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : activity up to {current_date}', figsize= (15,10), fontsize=13)
+
+dfrq.loc[dfrq['read'] == 'Y'].loc[dfrq['entreprise'] == 'CGI'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+plt.savefig(backup_path+brand+separator+'CGI_view.jpg')
+dfrq.loc[dfrq['write'] == 'Y'].loc[dfrq['entreprise'] == 'CGI'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+plt.savefig(backup_path+brand+separator+'CGI_contribute.jpg')
+dfrq.loc[dfrq['read'] == 'Y'].loc[dfrq['entreprise'] == 'Jules'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+plt.savefig(backup_path+brand+separator+'Jules_view.jpg')
+dfrq.loc[dfrq['write'] == 'Y'].loc[dfrq['entreprise'] == 'Jules'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+plt.savefig(backup_path+brand+separator+'Jules_contribute.jpg')
+
 #%%
-dfrq.groupby('access_date_to_path').sum().plot.bar()
+branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, brand, separator)
+# dfrq.loc[dfrq['read'] == 'Y'].loc[dfrq['entreprise'] == 'CGI'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+# plt.savefig(backup_path+brand+separator+brand+separator+'CGI_view.jpg')
+# dfrq.loc[dfrq['write'] == 'Y'].loc[dfrq['entreprise'] == 'CGI'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+# plt.savefig(backup_path+brand+separator+brand+separator+'CGI_contribute.jpg')
+dfrq.loc[dfrq['read'] == 'Y'].loc[dfrq['entreprise'] == 'Pimkie'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+plt.savefig(backup_path+brand+separator+brand+separator+'view.jpg')
+dfrq.loc[dfrq['write'] == 'Y'].loc[dfrq['entreprise'] == 'Pimkie'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
+plt.savefig(backup_path+brand+separator+brand+separator+'contribute.jpg')
+
+#%%
+dfrq.groupby([dfrq['access_date_to_path'],dfrq['entreprise']]).sum().plot.bar()
+#%%
+import datetime
+datetime.date(2022, 5, 23).isocalendar()[1]
+d = '2022-02-15'
+print(d[0:4])
+print(d[5:7])
+print(d[8:])
+dfrq
+#dfrq_week = dfrq.assign(week_number=datetime.date(dfrq['access_date_to_path'][0:4], dfrq['access_date_to_path'][5:7], dfrq['access_date_to_path'][8:]).isocalendar()[1])
+#dfrq_week = dfrq.assign(week_number=(datetime.date(dfrq.access_date_to_path.str[0:4], dfrq.access_date_to_path.str[5:7], dfrq.access_date_to_path.str[8:]).isocalendar()[1]))
+dfrq_date_splitted = dfrq.assign(year=dfrq.access_date_to_path.str[0:4], month=dfrq.access_date_to_path.str[5:7], day=dfrq.access_date_to_path.str[8:])
+dfrq_week = dfrq_date_splitted.assign(week= datetime.datetime.strptime(dfrq_date_splitted.access_date_to_path, '%Y-%m-%d') .isocalendar()[1])
+#dfrq_week.groupby(dfrq_week['week'], dfrq_week['entreprise']).sum.plot.bar()
+dfrq_week
 
 # %%
 df.to_excel(backup_path+"map.xlsx", index=False, sheet_name='connected_at_teast_once')
