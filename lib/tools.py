@@ -254,8 +254,12 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
         branded_tables = [ f'{brand}{separator}{table}' for table in tables ]
         for r in zip(tables, branded_tables):
             query = query.replace(*r)
+        # the tables contains "adm_profile" twice, so one need to delete the extra prefix added
         query = query.replace(f'{brand}{separator}{brand}{separator}', brand+separator)
+        
+        query = query.replace('#', '%')    
         branded_query = query.replace('$brand', brand)
+
         mlogger.info(f'branded query returned : {branded_query}')
         return branded_query
     except BaseException as be:
