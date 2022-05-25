@@ -21,7 +21,7 @@
     <infos>
         <appTitle>MAP - SI Jules Bizbee</appTitle>
         <companyName>CGI</companyName>
-        <copyrightYear>2019</copyrightYear>
+        <copyrightYear>2022</copyrightYear>
     </infos>
     <menu mode="accordion">
         <folder libelle="Indicateurs">
@@ -806,6 +806,7 @@
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="Activity" types="contains, starts with" />
+                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="has action on" />
                                 <outgoingEdgeType targetNodeTypes="Application,MacroApplication,PartnerApplication,Partner" types="uses" />
                             </outgoingEdgeTypes>
                         </nodeType>
