@@ -772,6 +772,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="businessID" />
                                 <metadata id="comments" />
                             </metadatas>
@@ -785,6 +786,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="businessID" />
                                 <metadata id="orderNumber" />
                                 <metadata id="comments" />
@@ -800,6 +802,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="businessID" />
                                 <metadata id="orderNumber" />
                                 <metadata id="comments" />
@@ -814,6 +817,7 @@
                             <metadatas>
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="activityType" >
                                     <allowedValues>
                                         <value>Interaction IHM</value>
@@ -846,6 +850,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -869,6 +874,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="status" />
                                 <metadata id="comments" />
                             </metadatas>
@@ -903,6 +909,7 @@
                             <metadatas>
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                                 <metadata id="status" />
                             </metadatas>
@@ -959,6 +966,9 @@
                         <nodeType id="Vendor">
                             <metadatas>
                                 <metadata id="comments" />
+                                <metadata id="linkToDocumentation" />
+                                <metadata id="description" />
+                                <metadata id="descriptionEN" />
                                 <metadata id="status" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -970,6 +980,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -999,6 +1010,7 @@
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="flowType">
                                     <allowedValues>
                                         <value>Stambia</value>
@@ -1020,6 +1032,7 @@
                         <nodeType id="File">
                             <metadatas>
                                 <metadata id="description" />
+                                <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -1034,6 +1047,7 @@
                                 <metadata id="comments" />
                                 <metadata id="status" />
                                 <metadata id="description" />
+                                <metadata id="linkToDocumentation" />
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="PartnerApplication" types="uses" />
