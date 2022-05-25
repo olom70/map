@@ -19,7 +19,7 @@
         <infoTab title="Documentation" contentType="HTML_VIEW" contentName="documentation"/>
     </infoPopup>
     <infos>
-        <appTitle>MAP - SI Jules Bizbee</appTitle>
+        <appTitle>MAP - Instance Tests</appTitle>
         <companyName>CGI</companyName>
         <copyrightYear>2022</copyrightYear>
     </infos>
@@ -1005,12 +1005,72 @@
                                 <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="composed of" />
                             </outgoingEdgeTypes>
                         </nodeType>
+                        <!--
+                        <nodeType id="Table"><metadatas><metadata id="description" /><metadata id="comments" /></metadatas><outgoingEdgeTypes><outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of" /></outgoingEdgeTypes></nodeType>
+                        -->
+                        <nodeType id="Partner">
+                            <metadatas>
+                                <metadata id="comments" />
+                                <metadata id="status" />
+                                <metadata id="description" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="PartnerApplication" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                    </nodeTypes>
+                </metamodelPart>
+                <override></override>
+            </scope>
+            <scope id="coucheTechnique" label="Couche Technique" guiUpdate="full">
+                <metamodelPart id="technical" label="Technical">
+                    <edgeTypes>
+                        <edgeType outgoing="hosts" incoming="is hosted by" />
+                    </edgeTypes>
+                    <nodeTypes>
+                        <nodeType id="Server">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="FTPServer" />
+                                <metadata id="SSHServer" />
+                                <metadata id="typeOfRDBMS" />
+                                <metadata id="portNumber" />
+                                <metadata id="fullConnectionString" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType targetNodeTypes="Database" types="hosts" />
+                                <outgoingEdgeType targetNodeTypes="FileDirectory" types="contains" />
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Database">
+                            <metadatas>
+                                <metadata id="description" />
+                                <metadata id="typeOfRDBMS" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType types="contains" targetNodeTypes="Schema"/>
+                                <outgoingEdgeType types="is source of" targetNodeTypes="TechnicalFlow"/>
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Schema">
+                            <metadatas>
+                                <metadata id="description" />
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType types="is source of" targetNodeTypes="TechnicalFlow"/>
+                            </outgoingEdgeTypes>
+                        </nodeType>
                         <nodeType id="TechnicalFlow">
                             <metadatas>
                                 <metadata id="nameEN" />
                                 <metadata id="description" />
                                 <metadata id="descriptionEN" />
+                                <metadata id="flowCode" description="code technique du flux,ex: code stambia ou ODI" />
+                                <metadata id="frequency"/>
                                 <metadata id="linkToDocumentation" />
+                                <metadata id="comments" />
+                                <metadata id="stambiaDescription" />
                                 <metadata id="flowType">
                                     <allowedValues>
                                         <value>Stambia</value>
@@ -1020,38 +1080,52 @@
                                         <value>Autre</value>
                                     </allowedValues>
                                 </metadata>
-                                <metadata id="flowCode" description="code technique du flux,ex: code stambia ou ODI" />
-                                <metadata id="frequency"/>
-                                <metadata id="linkToDocumentation" />
-                                <metadata id="comments" />
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="MacroApplication,Application,Middleware,PartnerApplication,Partner,File" types="has for target" />
+                                <outgoingEdgeType types="has for target" targetNodeTypes="Server"/>
+                                <outgoingEdgeType types="has for target" targetNodeTypes="Database"/>
+                                <outgoingEdgeType types="has for target" targetNodeTypes="Schema"/>
+                                <outgoingEdgeType types="has for target" targetNodeTypes="FileDirectory"/>
+                                <outgoingEdgeType types="has for target" targetNodeTypes="Untyped"/>
+                                <outgoingEdgeType types="calls" targetNodeTypes="TechnicalFlow"/>
+                                <outgoingEdgeType types="uses" targetNodeTypes="File"/>
+                                <outgoingEdgeType types="uses" targetNodeTypes="FileDirectory"/>
                             </outgoingEdgeTypes>
                         </nodeType>
                         <nodeType id="File">
                             <metadatas>
                                 <metadata id="description" />
+                                <metadata id="physicalName" />
                                 <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of" />
+                                <outgoingEdgeType types="is source of" targetNodeTypes="TechnicalFlow"/>
                             </outgoingEdgeTypes>
                         </nodeType>
-                        <!--
-                        <nodeType id="Table"><metadatas><metadata id="description" /><metadata id="comments" /></metadatas><outgoingEdgeTypes><outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of" /></outgoingEdgeTypes></nodeType>
-                        -->
-                        <nodeType id="Partner">
+                        <nodeType id="FileDirectory">
                             <metadatas>
-                                <metadata id="comments" />
-                                <metadata id="status" />
+                                <metadata id="description"/>
+                                <metadata id="path"/>
+                                <metadata id="configuration1"/>
+                                <metadata id="configuration2"/>
+                                <metadata id="configuration3"/>
+                                <metadata id="configuration4"/>
+                            </metadatas>
+                            <outgoingEdgeTypes>
+                                <outgoingEdgeType types="is source of" targetNodeTypes="TechnicalFlow"/>
+                                <outgoingEdgeType types="has for target" targetNodeTypes="TechnicalFlow"/>
+                                <outgoingEdgeType types="contains" targetNodeTypes="File"/>
+                            </outgoingEdgeTypes>
+                        </nodeType>
+                        <nodeType id="Untyped">
+                            <metadatas>
                                 <metadata id="description" />
                                 <metadata id="linkToDocumentation" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="PartnerApplication" types="uses" />
-                                <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
+                                <outgoingEdgeType types="is source of" targetNodeTypes="TechnicalFlow"/>
                             </outgoingEdgeTypes>
                         </nodeType>
                     </nodeTypes>
@@ -1157,8 +1231,10 @@
             <nodeTypeRefBases id="Vendor" icon="Service.svg" color="#01579B" />
             <nodeTypeRefBases id="Partner" icon="Handshake.svg" color="#00BCD4" />
             <nodeTypeRefBases id="PartnerApplication" icon="PartnerApplication.svg" color="#2AA6A6" />
-            <!--<nodeTypeRefBases id="Table" icon="Table.svg" color="#9E9D24" />-->
             <nodeTypeRefBases id="File" icon="File.svg" color="#C0CA33" />
+            <nodeTypeRefBases id="Database" icon="Table.svg" color="#9E9D24" />
+            <nodeTypeRefBases id="FileDirectory" icon="Node.svg" color="#762f8f" />
+            <nodeTypeRefBases id="Server" icon="Server.svg" color="#DD7300"/>
         </nodeTypeGUICharacteristics>
     </metamodel>
 </hotReloadConfiguration>
