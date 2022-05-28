@@ -215,3 +215,22 @@ s = "The quick brown fox jumps over the lazy dog"
 for r in (("brown", "red"), ("lazy", "quick")):
     s = s.replace(*r)
 print(s)
+#%%
+l = []
+def f(s: str) -> None:
+    if s is not None:
+        l.append(s)
+        print(id(l))
+    if s is None and isinstance(l,list):
+        l.clear()
+
+f('5')
+print(l)
+print(id(l))
+f('6')
+print(l)
+print(isinstance(l, list))
+for x in l:
+    print(f'l:{x}')
+f(None)
+print(l)
