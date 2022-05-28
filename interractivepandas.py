@@ -53,7 +53,7 @@ plt.savefig(backup_path+brand+separator+'connected.jpg')
 
 import pandas as pd
 brand = 'jules'
-branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, brand, separator)
+branded_query = brand_query(all_queries_in_a_dict['request_history_v2'], tables, brand, separator)
 sql_query = pd.read_sql(branded_query, conn)
 dfrq = pd.DataFrame(sql_query)
 
@@ -74,7 +74,7 @@ dfrq
 # ------------
 ## Différents tests
 #-------------
-
+#https://datatofish.com/concatenate-values-python/
 import datetime as dt
 mydate = '2022-03-20'
 dt.datetime.strptime(mydate, '%Y-%m-%d').isocalendar().week
@@ -88,18 +88,18 @@ dfrq.assign(
         myweek = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
             )
 
-dfrq["access_year2"] = list(map(lambda x: x[0:4], dfrq['access_date_to_path']))
-dfrq["access_month2"] = list(map(lambda x: x[5:7], dfrq['access_date_to_path']))
-dfrq["access_day2"] = list(map(lambda x: x[8:], dfrq['access_date_to_path']))
-dfrq["access_week2"] = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
-dfrq["access_year_week2"] = dfrq['access_year'] + '-' + dfrq['access_week']
-dfrq['access_year_month2'] = dfrq['access_year'] + '-' + dfrq['access_month']
+dfrq["access_year"] = list(map(lambda x: str(x[0:4]), dfrq['access_date_to_path']))
+dfrq["access_month"] = list(map(lambda x: str(x[5:7]), dfrq['access_date_to_path']))
+dfrq["access_day"] = list(map(lambda x: str(x[8:]), dfrq['access_date_to_path']))
+dfrq["access_week"] = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
+dfrq["access_year_week"] = dfrq['access_year'].map(str) + '-' + dfrq['access_week'].map(str)
+dfrq['access_year_month'] = dfrq['access_year'].map(str) + '-' + dfrq['access_month'].map(str)
 dfrq
 dfrq.loc[
         dfrq['read'] == 'Y'].loc[
             dfrq['entreprise'] == 'CGI'].loc[
                 dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
-                    dfrq['access_week2'] < 21
+                    dfrq['access_week'] < 21
                 ]
 
 
