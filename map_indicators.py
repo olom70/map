@@ -1,10 +1,3 @@
-# https://wesmckinney.com/book/preliminaries.html : Python for data analysis 3rd edition
-# https://datatofish.com/sql-to-pandas-dataframe/
-# https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
-# https://datatofish.com/export-dataframe-to-excel/
-# https://xlsxwriter.readthedocs.io/example_pandas_column_formats.html#
-# https://www.easytweaks.com/bar-plot-python-pandas-dataframe-example/
-# https://www.easytweaks.com/python-legend-plot-example/
 import configparser
 from sys import exit
 import logging
