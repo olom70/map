@@ -88,9 +88,11 @@ dfrq.assign(
         myweek = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
             )
 
-dfrq["access_year"] = list(map(lambda x: str(x[0:4]), dfrq['access_date_to_path']))
-dfrq["access_month"] = list(map(lambda x: str(x[5:7]), dfrq['access_date_to_path']))
-dfrq["access_day"] = list(map(lambda x: str(x[8:]), dfrq['access_date_to_path']))
+# used to do like just beneath but it's better to use the map method included in Pandas
+#dfrq["access_year"] = list(map(lambda x: str(x[0:4]), dfrq['access_date_to_path']))
+dfrq["access_year"] = dfrq['access_date_to_path'].map(lambda x: str(x[0:4]))
+dfrq["access_month"] = dfrq['access_date_to_path'].map(lambda x: str(x[5:7]))
+dfrq["access_day"] = dfrq['access_date_to_path'].map(lambda x: str(x[8:]))
 dfrq["access_week"] = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
 dfrq["access_year_week"] = dfrq['access_year'].map(str) + '-' + dfrq['access_week'].map(str)
 dfrq['access_year_month'] = dfrq['access_year'].map(str) + '-' + dfrq['access_month'].map(str)
