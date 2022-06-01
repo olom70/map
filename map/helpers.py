@@ -33,6 +33,8 @@ def process(digit: int):
             ).run()
             if am_I_ok:
                 prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> OK! importing.</b></HotPink></aaa>'))
+        case _:
+            pass
 
 def are_all_files_ok():
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> Welcome to the CGI MAP Janitor ! The indicator provider</b></HotPink></aaa>'))
@@ -44,6 +46,5 @@ def welcome():
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<b>---------------------------------</b>'))
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> Choose an Option :</b></HotPink></aaa>'))
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 0 : Quit</b></HotPink></aaa>'))
-    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 1 : Generate Indicators In Excel</b></HotPink></aaa>'))
-    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 2 : Plot indicators</b></HotPink></aaa>'))
-    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 3 : Remove the backup tables (a prompt will ask to confirm)</b></HotPink></aaa>'))
+    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 1 : Generate the db in the ini file folder</b></HotPink></aaa>'))
+    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 2 : Generate the indicators</b></HotPink></aaa>'))
