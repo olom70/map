@@ -6,7 +6,7 @@ import os
 ## First STEP : initialize
 #-------------
 from openpyxl import Workbook
-from lib.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, get_current_session, get_queries, brand_query
+from map.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, get_current_session, get_queries, brand_query
 INIFILE = 'map_indicators.ini'
 config = configparser.ConfigParser()
 config = check_ini_files_and_return_config_object(INIFILE)[0]
@@ -21,7 +21,7 @@ all_queries_in_a_dict =  get_queries([config])
 ## 2nd STep : back up DB
 #-------------
 
-from lib.tools import backup_in_memory_db_to_disk
+from map.tools import backup_in_memory_db_to_disk
 backup_full_path_name = backup_path + backup_name
 conn_backup = backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
 
