@@ -59,7 +59,7 @@ def main():
         except EOFError:
             break
         else:
-            helpers.process(digit_input, conninlist, variables_from_ini_in_dic)
+            helpers.processchoice(digit_input, conninlist, variables_from_ini_in_dic)
     print('GoodBye!')
     fh.close()
 

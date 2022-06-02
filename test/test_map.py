@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 sys.path.append(PROJECT_ROOT)
 from pytest import raises
 import map.tools as tools
-import map.process as process
+import map.process as mapprocess
 import logging
 
 def init_ok():
@@ -88,7 +88,7 @@ def backup_in_session(conninlist: list, variables_from_ini_in_dic: list) -> str:
     return backup_path, backup_full_path_name
 
 
-def check_queries(conninlist: list, configinlist: list, backup_path: str) -> None:
+def check_queries(conninlist: list, configinlist: list) -> None:
     #check if the queries are present in the inifile
     all_queries_in_a_dict = dict()
     all_queries_in_a_dict =  tools.get_queries(configinlist)
@@ -117,9 +117,14 @@ if __name__=="__main__":
 
 
     conninlist, configinlist, variables_from_ini_in_dic = init_ok()
-    backup_path, backup_full_path_name = backup_in_session(conninlist, variables_from_ini_in_dic)
-    check_queries(conninlist, configinlist, backup_path)
-    backup_in_ini_full_path = process.backup(conninlist, variables_from_ini_in_dic, 'ini')
+    backup_in_ini_full_path = mapprocess.backup(conninlist,
+                                                variables_from_ini_in_dic,
+                                                'ini')
     assert backup_in_ini_full_path is not None
+    backup_in_session_full_path = mapprocess.backup(conninlist,
+                                    variables_from_ini_in_dic,
+                                    'session')
+    assert backup_in_session_full_path is not None
+    check_queries(conninlist, configinlist)
 
     fh.close()

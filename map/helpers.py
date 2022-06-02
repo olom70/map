@@ -2,6 +2,7 @@ from prompt_toolkit import validation
 from prompt_toolkit import shortcuts
 import prompt_toolkit
 import map.process as mapprocess
+import map.tools as tools
 
 
 def is_ync(text):
@@ -21,7 +22,7 @@ validator = validation.Validator.from_callable(
     error_message='This input contains non-numeric characters',
     move_cursor_to_end=True)
 
-def process(digit: int, conninlist: list, variables_from_ini_in_dic: dict) -> None: 
+def processchoice(digit: int, conninlist: list, variables_from_ini_in_dic: dict) -> None: 
     match digit:
         case 0:
             exit()
@@ -39,7 +40,10 @@ def process(digit: int, conninlist: list, variables_from_ini_in_dic: dict) -> No
                 text='Are the input files ready ?"'
             ).run()
             if I_am_ok:
-                prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> OK! importing.</b></HotPink></aaa>'))
+                backup_in_session_full_path = mapprocess.backup(conninlist,
+                                                     variables_from_ini_in_dic,
+                                                     'session')
+                prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b>The DB of the session is here : %s</b></HotPink></aaa>' %backup_in_session_full_path ))
         case _:
             pass
 
