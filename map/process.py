@@ -4,21 +4,23 @@ import map.tools as tools
 mlogger = logging.getLogger('map_indicator_app.tools')
 
 @tools.log_function_call
-def backup(conninlist: list, variables_from_ini_in_list: list, where = ('ini', 'session')) -> str:
+def backup(conninlist: list, variables_from_ini_in_dic: list, where = ('ini', 'session')) -> str:
     '''
     Backup the in memory database in the specified file
     '''
     try:
         conn = conninlist[0]
-        maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
 
         match(where):
             case 'session':
-                current_session, current_date = tools.get_current_session(maindir, prefix, context, separator)
-                backup_full_path_name = current_session + os.path.sep + backup_name
+                current_session, current_date = tools.get_current_session(variables_from_ini_in_dic['maindir'],
+                                                                            variables_from_ini_in_dic['prefix'],
+                                                                            variables_from_ini_in_dic['context'],
+                                                                            variables_from_ini_in_dic['separator'])
+                backup_full_path_name = current_session + os.path.sep + variables_from_ini_in_dic['backup_name']
                 backup_path = current_session + os.path.sep
             case('ini'):
-                backup_full_path_name = iniFilesDir + os.path.sep + backup_name
+                backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
         conn_backup = tools.backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
         if conn_backup is not None:
             mlogger.info('The in-memory DB has just been dumped to : {v}'.format(v=backup_full_path_name))

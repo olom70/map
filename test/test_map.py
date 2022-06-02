@@ -19,61 +19,64 @@ def init_ok():
     assert 'Main' in config
 
     #Secondly, check if all the required files exists
-    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
-    retailers, tables, toolkit_tables = list(), list(), list()
-    retailers_tables = dict()
-    variables_from_ini_in_list = tools.create_main_variables_from_config([config])
-    assert variables_from_ini_in_list is not None
-    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
-    assert maindir is not None
-    logger.info('content of variable maindir : {v}'.format(v=maindir))
-    assert len(maindir) > 0
-    logger.info('content of variable iniFilesDir : {v}'.format(v=iniFilesDir))
-    assert len(iniFilesDir) > 0
-    logger.info('content of variable separator : {v}'.format(v=separator))
-    assert len(separator) > 0
-    logger.info('content of variable retailers : {v}'.format(v=retailers))
-    assert len(retailers) > 0
-    logger.info('content of variable tables : {v} '.format(v=tables))
-    assert len(tables) > 0
+    variables_from_ini_in_dic = tools.create_main_variables_from_config([config])
+    assert variables_from_ini_in_dic is not None
+    
+    assert variables_from_ini_in_dic['maindir'] is not None
+    logger.info('content of variable maindir : {v}'.format(v=variables_from_ini_in_dic['maindir']))
+    assert len(variables_from_ini_in_dic['maindir']) > 0
+    logger.info('content of variable iniFilesDir : {v}'.format(v=variables_from_ini_in_dic['iniFilesDir']))
+    assert len(variables_from_ini_in_dic['iniFilesDir']) > 0
+    logger.info('content of variable separator : {v}'.format(v=variables_from_ini_in_dic['separator']))
+    assert len(variables_from_ini_in_dic['separator']) > 0
+    logger.info('content of variable retailers : {v}'.format(v=variables_from_ini_in_dic['retailers']))
+    assert len(variables_from_ini_in_dic['retailers']) > 0
+    logger.info('content of variable tables : {v} '.format(v=variables_from_ini_in_dic['tables']))
+    assert len(variables_from_ini_in_dic['tables']) > 0
 
-    logger.info('content of variable retailers_tables : {v} '.format(v=retailers_tables))
-    assert len(retailers_tables) > 0
-    logger.info('content of variable toolkit_tables : {v}'.format(v=toolkit_tables))
-    assert len(toolkit_tables) > 0
-    logger.info('content of variable file_ext : {v}'.format(v=file_ext))
-    assert len(file_ext) > 0
-    logger.info('content of variable prefix : {v}'.format(v=prefix))
-    assert len(prefix) > 0
-    logger.info('content of variable context : {v}'.format(v=context))
-    assert len(context) > 0
-    logger.info('content of variable backup_name : {v}'.format(v=backup_name))
-    assert len(backup_name) > 0
-    logger.info('content of variable log_level : {v}'.format(v=log_level))
-    assert len(log_level) > 0
+    logger.info('content of variable retailers_tables : {v} '.format(v=variables_from_ini_in_dic['retailers_tables']))
+    assert len(variables_from_ini_in_dic['retailers_tables']) > 0
+    logger.info('content of variable toolkit_tables : {v}'.format(v=variables_from_ini_in_dic['toolkit_tables']))
+    assert len(variables_from_ini_in_dic['toolkit_tables']) > 0
+    logger.info('content of variable file_ext : {v}'.format(v=variables_from_ini_in_dic['file_ext']))
+    assert len(variables_from_ini_in_dic['file_ext']) > 0
+    logger.info('content of variable prefix : {v}'.format(v=variables_from_ini_in_dic['prefix']))
+    assert len(variables_from_ini_in_dic['prefix']) > 0
+    logger.info('content of variable context : {v}'.format(v=variables_from_ini_in_dic['context']))
+    assert len(variables_from_ini_in_dic['context']) > 0
+    logger.info('content of variable backup_name : {v}'.format(v=variables_from_ini_in_dic['backup_name']))
+    assert len(variables_from_ini_in_dic['backup_name']) > 0
+    logger.info('content of variable log_level : {v}'.format(v=variables_from_ini_in_dic['log_level']))
+    assert len(variables_from_ini_in_dic['log_level']) > 0
 
     #Thirdly, load all the files in the database
-    conn = tools.initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
+    conn = tools.initialize_db(':memory:',
+                                 variables_from_ini_in_dic['retailers'],
+                                 variables_from_ini_in_dic['retailers_tables'],
+                                 variables_from_ini_in_dic['toolkit_tables'],
+                                 variables_from_ini_in_dic['file_ext'],
+                                 variables_from_ini_in_dic['iniFilesDir'])[0]
     assert conn is not None
     cur = conn.cursor()
     cur.execute("select * from path")
     assert len(cur.fetchall()) > 0
 
 
-    return [[conn], [config], variables_from_ini_in_list]
+    return ([conn], [config], variables_from_ini_in_dic)
 
 
-def backup_in_session(conninlist: list, variables_from_ini_in_list: list) -> str:
+def backup_in_session(conninlist: list, variables_from_ini_in_dic: list) -> str:
     conn = conninlist[0]
-    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
-
     # Time to save a backup of the database
-    current_session, current_date = tools.get_current_session(maindir, prefix, context, separator)
+    current_session, current_date = tools.get_current_session(variables_from_ini_in_dic['maindir'],
+                                                                variables_from_ini_in_dic['prefix'],
+                                                                variables_from_ini_in_dic['context'],
+                                                                variables_from_ini_in_dic['separator'])
     assert current_session is not None
     assert current_date is not None
     logger.info('content of variable current_session : {v}'.format(v=current_session))
 
-    backup_full_path_name = current_session + os.path.sep + backup_name
+    backup_full_path_name = current_session + os.path.sep + variables_from_ini_in_dic['backup_name']
     backup_path = current_session + os.path.sep
       
     conn_backup = tools.backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
@@ -85,23 +88,20 @@ def backup_in_session(conninlist: list, variables_from_ini_in_list: list) -> str
     return backup_path, backup_full_path_name
 
 
-
-
 def check_queries(conninlist: list, configinlist: list, backup_path: str) -> None:
     #check if the queries are present in the inifile
     all_queries_in_a_dict = dict()
     all_queries_in_a_dict =  tools.get_queries(configinlist)
     assert all_queries_in_a_dict is not None
-    variables_from_ini_in_list = tools.create_main_variables_from_config(configinlist)
-    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
-    branded_query = tools.brand_query(all_queries_in_a_dict['connected_at_least_once'], tables, 'jules', separator)
+    variables_from_ini_in_dic = tools.create_main_variables_from_config(configinlist)
+    branded_query = tools.brand_query(all_queries_in_a_dict['connected_at_least_once'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
     cur = conninlist[0].cursor()
     assert len(cur.execute(branded_query).fetchall()) > 0
-    branded_query = tools.brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], tables, 'jules', separator)
+    branded_query = tools.brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
     assert len(cur.execute(branded_query).fetchall()) > 0
-    branded_query = tools.brand_query(all_queries_in_a_dict['request_history'], tables, 'jules', separator)
+    branded_query = tools.brand_query(all_queries_in_a_dict['request_history'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
     assert len(cur.execute(branded_query).fetchall()) > 0
-    branded_query = tools.brand_query(all_queries_in_a_dict['request_history_v2'], tables, 'jules', separator)
+    branded_query = tools.brand_query(all_queries_in_a_dict['request_history_v2'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
     assert len(cur.execute(branded_query).fetchall()) > 0
 
 if __name__=="__main__":
@@ -116,10 +116,10 @@ if __name__=="__main__":
     logger.info('Start of the test suite')
 
 
-    conninlist, configinlist, variables_from_ini_in_a_list = init_ok()
-    backup_path, backup_full_path_name = backup_in_session(conninlist, variables_from_ini_in_a_list)
+    conninlist, configinlist, variables_from_ini_in_dic = init_ok()
+    backup_path, backup_full_path_name = backup_in_session(conninlist, variables_from_ini_in_dic)
     check_queries(conninlist, configinlist, backup_path)
-    backup_in_ini_full_path = process.backup(conninlist, variables_from_ini_in_a_list, 'ini')
+    backup_in_ini_full_path = process.backup(conninlist, variables_from_ini_in_dic, 'ini')
     assert backup_in_ini_full_path is not None
 
     fh.close()

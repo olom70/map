@@ -25,7 +25,7 @@ def check_ini_files_and_return_config_object(inifile: str) -> list:
     '''
         check if the ini file is OK
         if so, return the config object in a list
-        of not return None
+        if not return None
     '''
     config = configparser.ConfigParser()
     config.read(inifile)
@@ -81,63 +81,66 @@ def check_ini_files_and_return_config_object(inifile: str) -> list:
         return None
 
 @log_function_call
-def create_main_variables_from_config(configinlist: list) -> tuple:
+def create_main_variables_from_config(configinlist: list) -> dict:
     '''
-        from the ini file,  create all the variables from the sections 'Main' and 'Sessions' and return them in a tuple
+        from the ini file,  create all the variables from the sections 'Main' and 'Sessions' and return them in a dictionary
         return a tuple of None in case of a problem
     '''
     try:
-        maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
-        retailers, toolkit_tables, tables = list(), list(), list()
-        retailers_tables = dict()
         config = configinlist[0]
+        variables_from_ini_in_dic = dict()
         if (platform.system() == 'Linux'):
-            maindir = config['Main']['mainDirLinux']
+            variables_from_ini_in_dic['maindir'] = config['Main']['mainDirLinux']
         else:
-            maindir = config['Main']['mainDirWindows']
+            variables_from_ini_in_dic['maindir'] = config['Main']['mainDirWindows']
 
-        if not fileutil.file_exists_TrueFalse(head=maindir, tail='', typeExtraction='mainDir', dir='dir'):
-            raise ValueError('mainpath {mainDir} not found'.format(mainDir=maindir))    
+        if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['maindir'], tail='', typeExtraction='mainDir', dir='dir'):
+            raise ValueError('mainpath {mainDir} not found'.format(mainDir=variables_from_ini_in_dic['maindir']))    
 
-        iniFilesDir = maindir + os.path.sep + config['Main']['iniFilesDir']
-        if not fileutil.file_exists_TrueFalse(head=iniFilesDir, tail='', typeExtraction='mainDir', dir='dir'):
-            raise ValueError('mainpath {iniFilesDir} not found'.format(mainDir=iniFilesDir))    
+        variables_from_ini_in_dic['iniFilesDir'] = variables_from_ini_in_dic['maindir'] + os.path.sep + config['Main']['iniFilesDir']
+        if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['iniFilesDir'], tail='', typeExtraction='mainDir', dir='dir'):
+            raise ValueError('mainpath {iniFilesDir} not found'.format(mainDir=variables_from_ini_in_dic['iniFilesDir']))    
 
-        separator = config['Main']['Separator']
-        retailers = config['Main']['retailers'].split()
-        tables = config['Main']['tables'].split()
-        toolkit_tables = config['Main']['toolkit_tables'].split()
-        file_ext = config['Main']['file_ext']
-        log_level = config['Main']['log_level']
-        prefix = config['Sessions']['prefix']
-        context = config['Sessions']['context']
-        backup_name = config['Sessions']['backup_name']
+        variables_from_ini_in_dic['separator'] = config['Main']['Separator']
+        variables_from_ini_in_dic['retailers'] = config['Main']['retailers'].split()
+        variables_from_ini_in_dic['tables'] = config['Main']['tables'].split()
+        variables_from_ini_in_dic['toolkit_tables'] = config['Main']['toolkit_tables'].split()
+        variables_from_ini_in_dic['file_ext'] = config['Main']['file_ext']
+        variables_from_ini_in_dic['log_level'] = config['Main']['log_level']
+        variables_from_ini_in_dic['prefix'] = config['Sessions']['prefix']
+        variables_from_ini_in_dic['context'] = config['Sessions']['context']
+        variables_from_ini_in_dic['backup_name'] = config['Sessions']['backup_name']
 
-
+        retailers_tables = dict()
         # build the name of the tables for all retailers. e.g. jules_adm_role
-        for retailer in retailers:
-            retailer_tables = [ f'{retailer}{separator}{table}' for table in tables]
+        for retailer in variables_from_ini_in_dic['retailers']:
+            retailer_tables = [ f"{retailer}{variables_from_ini_in_dic['separator']}{table}" for table in variables_from_ini_in_dic['tables']]
             retailers_tables[retailer] = retailer_tables
-        
+        variables_from_ini_in_dic['retailers_tables'] = retailers_tables
+
         # check if each table as its corresponding file 
-        for retailer in retailers:
+        for retailer in variables_from_ini_in_dic['retailers']:
             for table in retailers_tables[retailer]:
-                if not fileutil.file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='retailersFiles', dir='file'):
-                    raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
+                if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['iniFilesDir'],
+                                                        tail=table+variables_from_ini_in_dic['file_ext'],
+                                                        typeExtraction='retailersFiles', dir='file'):
+                    raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+variables_from_ini_in_dic['file_ext'], dir=variables_from_ini_in_dic['iniFilesDir'])))
         
-        for table in toolkit_tables:
-            if not fileutil.file_exists_TrueFalse(head=iniFilesDir, tail=table+file_ext, typeExtraction='toolkitFiles', dir='file'):
-                    raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+file_ext, dir=iniFilesDir)))
+        for table in variables_from_ini_in_dic['toolkit_tables']:
+            if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['iniFilesDir'],
+                                                    tail=table+variables_from_ini_in_dic['file_ext'],
+                                                    typeExtraction='toolkitFiles', dir='file'):
+                    raise(ValueError('file {file} does not exists in dir {dir}'.format(file=table+variables_from_ini_in_dic['file_ext'], dir=variables_from_ini_in_dic['iniFilesDir'])))
 
         mlogger.info('function create_main_variables_from_config : execution OK. Returning the entries of the ini file as expected')
-        return maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level
+        return variables_from_ini_in_dic
 
     except ValueError as vr:
         mlogger.critical(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
-        return None, None, None, None, None, None, None, None; None, None, None, None
+        return None
     except BaseException as be:
         mlogger.critical(f'unexpected error in the function create_main_variables_from_config() : {be.args}')
-        return None, None, None, None, None, None, None, None; None, None, None, None
+        return None
 
 
 @log_function_call

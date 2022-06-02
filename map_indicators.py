@@ -26,26 +26,27 @@ def main():
         logger.critical(f'The ini file {INIFILE} is malformed or does not exists. Exiting the application. Check the logs')
         exit()
 
-    maindir, separator, file_ext, iniFilesDir, prefix, context, backup_name, log_level = str(), str(), str(), str(), str(), str(), str(), str()
-    tables, retailers, toolkit_tables = list(), list(), list()
-    retailers_tables = dict()
-    variables_from_ini_in_list = tools.create_main_variables_from_config([config])
-    if variables_from_ini_in_list is None:
+    variables_from_ini_in_dic = tools.create_main_variables_from_config([config])
+    if variables_from_ini_in_dic is None:
         logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application. Check the logs')
         exit()
-    maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
-    logger.setLevel(log_level)
+    logger.setLevel(variables_from_ini_in_dic['log_level'])
 
-    helpers.are_all_files_ok()
-    input = prompt_toolkit.prompt('Your choice : (y)es/ (c)ancel) : ', validator=helpers.validator_yn)
-    if input == 'c':
-        prompt_toolkit.print_formatted_text(prompt_toolkit.HTML(f'<aaa bg="LightYellow"><HotPink><b>Goodbye !</b></HotPink></aaa>'))
-        logger.info('User canceled the initialisation')
-        fh.close()
-        exit()
+    # helpers.are_all_files_ok()
+    # input = prompt_toolkit.prompt('Your choice : (y)es/ (c)ancel) : ', validator=helpers.validator_yn)
+    # if input == 'c':
+    #     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML(f'<aaa bg="LightYellow"><HotPink><b>Goodbye !</b></HotPink></aaa>'))
+    #     logger.info('User canceled the initialisation')
+    #     fh.close()
+    #     exit()
 
-    conn = tools.initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
-    if conn is None:
+    conninlist = tools.initialize_db(':memory:',
+                                variables_from_ini_in_dic['retailers'],
+                                variables_from_ini_in_dic['retailers_tables'],
+                                variables_from_ini_in_dic['toolkit_tables'],
+                                variables_from_ini_in_dic['file_ext'],
+                                variables_from_ini_in_dic['iniFilesDir'])
+    if conninlist[0] is None:
         logger.critical('Initialisation of the databse failed. Exiting the application. Check the logs')
 
 
@@ -58,7 +59,7 @@ def main():
         except EOFError:
             break
         else:
-            helpers.process(digit_input)
+            helpers.process(digit_input, conninlist, variables_from_ini_in_dic)
     print('GoodBye!')
     fh.close()
 

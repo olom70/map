@@ -1,6 +1,7 @@
 from prompt_toolkit import validation
 from prompt_toolkit import shortcuts
 import prompt_toolkit
+import map.process as mapprocess
 
 
 def is_ync(text):
@@ -20,18 +21,24 @@ validator = validation.Validator.from_callable(
     error_message='This input contains non-numeric characters',
     move_cursor_to_end=True)
 
-def process(digit: int): 
+def process(digit: int, conninlist: list, variables_from_ini_in_dic: dict) -> None: 
     match digit:
         case 0:
             exit()
-        case 1:
-            prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> %s preparing...</b></HotPink></aaa>' % digit))
+        case 1: #backup db in inifile
+            backup_in_ini_full_path = mapprocess.backup(conninlist,
+                                                     variables_from_ini_in_dic,
+                                                     'ini')
+            if backup_in_ini_full_path is None:
+                prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>A problem occured, check in the log file</b></Green></aaa>'))
+            else:
+                prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b>DB backed up here : %s</b></HotPink></aaa>' %backup_in_ini_full_path ))
         case 2:
-            am_I_ok = shortcuts.yes_no_dialog(
+            I_am_ok = shortcuts.yes_no_dialog(
                 title='Head up !',
                 text='Are the input files ready ?"'
             ).run()
-            if am_I_ok:
+            if I_am_ok:
                 prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> OK! importing.</b></HotPink></aaa>'))
         case _:
             pass
