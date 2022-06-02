@@ -3,7 +3,7 @@ import os
 import map.tools as tools
 mlogger = logging.getLogger('map_indicator_app.tools')
 
-
+@tools.log_function_call
 def backup(conninlist: list, variables_from_ini_in_list: list, where = ('ini', 'session')) -> str:
     '''
     Backup the in memory database in the specified file
@@ -18,7 +18,7 @@ def backup(conninlist: list, variables_from_ini_in_list: list, where = ('ini', '
                 backup_full_path_name = current_session + os.path.sep + backup_name
                 backup_path = current_session + os.path.sep
             case('ini'):
-                backup_full_path_name = maindir + os.path.sep + iniFilesDir + os.path.sep + backup_name
+                backup_full_path_name = iniFilesDir + os.path.sep + backup_name
         conn_backup = tools.backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
         if conn_backup is not None:
             mlogger.info('The in-memory DB has just been dumped to : {v}'.format(v=backup_full_path_name))
