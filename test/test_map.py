@@ -4,6 +4,7 @@ import configparser
 from sqlite3 import Connection, OperationalError
 import sqlite3
 import sys
+from tkinter.messagebox import NO
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(PROJECT_ROOT)
@@ -65,45 +66,6 @@ def init_ok():
     return ([conn], [config], variables_from_ini_in_dic)
 
 
-def backup_in_session(conninlist: list, variables_from_ini_in_dic: list) -> str:
-    conn = conninlist[0]
-    # Time to save a backup of the database
-    current_session, current_date = tools.get_current_session(variables_from_ini_in_dic['maindir'],
-                                                                variables_from_ini_in_dic['prefix'],
-                                                                variables_from_ini_in_dic['context'],
-                                                                variables_from_ini_in_dic['separator'])
-    assert current_session is not None
-    assert current_date is not None
-    logger.info('content of variable current_session : {v}'.format(v=current_session))
-
-    backup_full_path_name = current_session + os.path.sep + variables_from_ini_in_dic['backup_name']
-    backup_path = current_session + os.path.sep
-      
-    conn_backup = tools.backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
-    cur_backup = conn_backup.cursor()
-    cur_backup.execute("select * from path")
-    assert len(cur_backup.fetchall()) > 0
-    conn_backup.close()
-
-    return backup_path, backup_full_path_name
-
-
-def check_queries(conninlist: list, configinlist: list) -> None:
-    #check if the queries are present in the inifile
-    all_queries_in_a_dict = dict()
-    all_queries_in_a_dict =  tools.get_queries(configinlist)
-    assert all_queries_in_a_dict is not None
-    variables_from_ini_in_dic = tools.create_main_variables_from_config(configinlist)
-    branded_query = tools.brand_query(all_queries_in_a_dict['connected_at_least_once'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
-    cur = conninlist[0].cursor()
-    assert len(cur.execute(branded_query).fetchall()) > 0
-    branded_query = tools.brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
-    assert len(cur.execute(branded_query).fetchall()) > 0
-    branded_query = tools.brand_query(all_queries_in_a_dict['request_history'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
-    assert len(cur.execute(branded_query).fetchall()) > 0
-    branded_query = tools.brand_query(all_queries_in_a_dict['request_history_v2'], variables_from_ini_in_dic['tables'], 'jules', variables_from_ini_in_dic['separator'])
-    assert len(cur.execute(branded_query).fetchall()) > 0
-
 if __name__=="__main__":
 
     logger = logging.getLogger('map_indicator_app')
@@ -117,14 +79,24 @@ if __name__=="__main__":
 
 
     conninlist, configinlist, variables_from_ini_in_dic = init_ok()
-    backup_in_ini_full_path = mapprocess.backup(conninlist,
-                                                variables_from_ini_in_dic,
-                                                'ini')
-    assert backup_in_ini_full_path is not None
-    backup_in_session_full_path = mapprocess.backup(conninlist,
-                                    variables_from_ini_in_dic,
-                                    'session')
-    assert backup_in_session_full_path is not None
-    check_queries(conninlist, configinlist)
+    
+    current_session, current_date = tools.create_current_session(variables_from_ini_in_dic['maindir'],
+                                                                    variables_from_ini_in_dic['prefix'],
+                                                                    variables_from_ini_in_dic['context'],
+                                                                    variables_from_ini_in_dic['separator'])
+    assert current_session is not None                                                                    
+    backup_full_path_name = current_session + os.path.sep + variables_from_ini_in_dic['backup_name']
+    assert mapprocess.backup_ok(conninlist, backup_full_path_name)
+
+
+    backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
+    assert mapprocess.backup_ok(conninlist, backup_full_path_name)
+        
+
+    assert tools.queries_are_ok(conninlist, configinlist, variables_from_ini_in_dic)
+
+    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic)
+
+
 
     fh.close()

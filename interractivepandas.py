@@ -6,7 +6,7 @@ import os
 ## First STEP : initialize
 #-------------
 from openpyxl import Workbook
-from map.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, get_current_session, get_queries, brand_query
+from map.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, create_current_session, get_queries, brand_query
 INIFILE = 'map_indicators.ini'
 config = configparser.ConfigParser()
 config = check_ini_files_and_return_config_object(INIFILE)[0]
@@ -16,11 +16,10 @@ conn = initialize_db(':memory:', variables_from_ini_in_dic['retailers'],
                                 variables_from_ini_in_dic['toolkit_tables'],
                                 variables_from_ini_in_dic['file_ext'],
                                 variables_from_ini_in_dic['iniFilesDir'])[0]
-backup_path, current_date = get_current_session(variables_from_ini_in_dic['maindir'],
+backup_path, current_date = create_current_session(variables_from_ini_in_dic['maindir'],
                                                 variables_from_ini_in_dic['prefix'],
                                                 variables_from_ini_in_dic['context'],
                                                 variables_from_ini_in_dic['separator'])
-backup_path = backup_path+ os.path.sep
 all_queries_in_a_dict =  get_queries([config])
 #%%
 # ------------

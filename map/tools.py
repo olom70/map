@@ -3,6 +3,7 @@ import datetime
 import platform
 import configparser
 import sqlite3
+from xmlrpc.client import Boolean
 import pandas as pd
 from glob import glob
 import logging
@@ -171,7 +172,7 @@ def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, too
         return None
 
 @log_function_call
-def get_current_session(maindir: str, prefix: str, context: str, separator: str) -> tuple:
+def create_current_session(maindir: str, prefix: str, context: str, separator: str) -> tuple:
     '''
         create the folder where all the files à the current execution will lies.
         by default the format of the name of this folder is {prefix}{separator}{date|datetime}{Number of the session for this date/datetime}
@@ -267,3 +268,27 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
     except BaseException as be:
         mlogger.critical(f'unexpected error in the function brand_query() : {be.args}')
         return None
+
+@log_function_call
+def queries_are_ok(conninlist: list, configinlist: list, variables_from_ini_in_dic: list) -> Boolean:
+    '''
+        Check all the queries against a retailer to validate that they execute well
+    '''
+    try:
+        all_queries_in_a_dict = dict()
+        all_queries_in_a_dict =  get_queries(configinlist)
+
+        cur = conninlist[0].cursor()
+
+        for query in all_queries_in_a_dict.values():
+            mlogger.info(f'query being checked : {query}')
+            branded_query = brand_query(
+                                                query,
+                                                variables_from_ini_in_dic['tables'],
+                                                variables_from_ini_in_dic['retailers'][0],
+                                                variables_from_ini_in_dic['separator'])
+            assert len(cur.execute(branded_query).fetchall()) > 0
+        return True
+    except BaseException as be:
+        mlogger.critical(f'unexpected error in the function check_query() : {be.args}')
+        return False
