@@ -10,10 +10,16 @@ from map.tools import check_ini_files_and_return_config_object, create_main_vari
 INIFILE = 'map_indicators.ini'
 config = configparser.ConfigParser()
 config = check_ini_files_and_return_config_object(INIFILE)[0]
-variables_from_ini_in_list = create_main_variables_from_config([config])
-maindir, separator, retailers, tables, retailers_tables, toolkit_tables, file_ext, iniFilesDir, prefix, context, backup_name, log_level = variables_from_ini_in_list
-conn = initialize_db(':memory:', retailers, retailers_tables, toolkit_tables, file_ext, iniFilesDir)[0]
-backup_path, current_date = get_current_session(maindir, prefix, context, separator)
+variables_from_ini_in_dic = create_main_variables_from_config([config])
+conn = initialize_db(':memory:', variables_from_ini_in_dic['retailers'],
+                                variables_from_ini_in_dic['retailers_tables'],
+                                variables_from_ini_in_dic['toolkit_tables'],
+                                variables_from_ini_in_dic['file_ext'],
+                                variables_from_ini_in_dic['iniFilesDir'])[0]
+backup_path, current_date = get_current_session(variables_from_ini_in_dic['maindir'],
+                                                variables_from_ini_in_dic['prefix'],
+                                                variables_from_ini_in_dic['context'],
+                                                variables_from_ini_in_dic['separator'])
 backup_path = backup_path+ os.path.sep
 all_queries_in_a_dict =  get_queries([config])
 #%%
@@ -22,7 +28,7 @@ all_queries_in_a_dict =  get_queries([config])
 #-------------
 
 from map.tools import backup_in_memory_db_to_disk
-backup_full_path_name = backup_path + backup_name
+backup_full_path_name = backup_path + variables_from_ini_in_dic['backup_name']
 conn_backup = backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
 
 # %%
@@ -32,7 +38,7 @@ conn_backup = backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
 
 import pandas as pd
 brand = 'jules'
-branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], tables, brand, separator)
+branded_query = brand_query(all_queries_in_a_dict['connected_at_least_once_v2'], variables_from_ini_in_dic['tables'], brand, variables_from_ini_in_dic['separator'])
 sql_query = pd.read_sql(branded_query, conn)
 df = pd.DataFrame(sql_query)
 print(f'df.index : {df.index}')
@@ -45,7 +51,7 @@ df
 
 import matplotlib.pyplot as plt
 df.plot.barh(stacked=True, x='Teams', title=f'{brand.capitalize()} : status of connections on {current_date}', figsize= (12,7), fontsize=13)
-plt.savefig(backup_path+brand+separator+'connected.jpg')
+plt.savefig(backup_path+brand+variables_from_ini_in_dic['separator']+'connected.jpg')
 #%%
 # ------------
 ## USAGE QUERY LOAD
@@ -53,7 +59,7 @@ plt.savefig(backup_path+brand+separator+'connected.jpg')
 
 import pandas as pd
 brand = 'jules'
-branded_query = brand_query(all_queries_in_a_dict['request_history_v2'], tables, brand, separator)
+branded_query = brand_query(all_queries_in_a_dict['request_history_v2'], variables_from_ini_in_dic['tables'], brand, variables_from_ini_in_dic['separator'])
 sql_query = pd.read_sql(branded_query, conn)
 dfrq = pd.DataFrame(sql_query)
 
@@ -72,15 +78,12 @@ dfrq.insert(1, "req_user_date", dfrq["req_user"]  + dfrq['access_date_to_path'])
 dfrq
 #%%
 # ------------
-## Différents tests
+## Enrich dataframe
 #-------------
 #https://datatofish.com/concatenate-values-python/
 import datetime as dt
 mydate = '2022-03-20'
 dt.datetime.strptime(mydate, '%Y-%m-%d').isocalendar().week
-#dfrq["myweek"] = dt.datetime.strptime(dfrq['access_date_to_path'], '%Y-%m-%d').isocalendar().week
-#dfrq.assign(myweek = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"])))
-#dfrq.assign(myweek2= pd.to_datetime(dfrq["access_date_to_path"]))
 dfrq.assign(
         myyear = list(map(lambda x: x[0:4], dfrq['access_date_to_path'])),
         mymonth = list(map(lambda x: x[5:7], dfrq['access_date_to_path'])),
@@ -132,7 +135,13 @@ dfrqjules.loc[
                                         title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
                                         figsize= (15,10),
                                         fontsize=13)
-plt.savefig(backup_path+'Instance-'+brand+separator+entreprise+separator+'view.jpg', bbox_inches='tight')
+plt.savefig(backup_path+
+            'Instance-'+
+            brand+variables_from_ini_in_dic['separator']+
+            entreprise+
+            variables_from_ini_in_dic['separator']+
+            'view.jpg',
+            bbox_inches='tight')
 
 # access to contribute
 dfrqjules.loc[
@@ -152,7 +161,13 @@ dfrqjules.loc[
                                         title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)',
                                         figsize= (15,10),
                                         fontsize=13)
-plt.savefig(backup_path+'Instance-'+brand+separator+entreprise+separator+'contribute.jpg', bbox_inches='tight')
+plt.savefig(backup_path+
+            'Instance-'+
+            brand+variables_from_ini_in_dic['separator']+
+            entreprise+
+            variables_from_ini_in_dic['separator']+
+            'contribute.jpg',
+            bbox_inches='tight')
 
 entreprise = brand
 # view only acess
@@ -172,7 +187,13 @@ dfrqjules.loc[
                                     stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
                                     figsize= (15,10),
                                     fontsize=13)
-plt.savefig(backup_path+'Instance-'+brand+separator+entreprise+separator+'view.jpg', bbox_inches='tight')
+plt.savefig(backup_path+
+            'Instance-'+
+            brand+variables_from_ini_in_dic['separator']+
+            entreprise+
+            variables_from_ini_in_dic['separator']+
+            'view.jpg',
+            bbox_inches='tight')
 
 #dfrqjules.loc[dfrqjules['write'] == 'Y'].loc[dfrqjules['entreprise'] == 'Jules'].loc[dfrqjules['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrqjules['access_year_week'], dfrqjules['entreprise'], dfrqjules['team']]).count().plot.barh(y='access_date_to_path', stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
 
@@ -194,7 +215,13 @@ dfrqjules.loc[
                                         figsize= (15,10),
                                         fontsize=13)
 
-plt.savefig(backup_path+'Instance-'+brand+separator+entreprise+separator+'contribute.jpg', bbox_inches='tight')
+plt.savefig(backup_path+
+            'Instance-'+
+            brand+variables_from_ini_in_dic['separator']+
+            entreprise+
+            variables_from_ini_in_dic['separator']+
+            'contribute.jpg',
+            bbox_inches='tight')
 
 #%%
 # ------------
@@ -203,17 +230,51 @@ plt.savefig(backup_path+'Instance-'+brand+separator+entreprise+separator+'contri
 import pandas as pd
 import matplotlib.pyplot as plt
 brand = 'pimkie'
-branded_query = brand_query(all_queries_in_a_dict['request_history'], tables, brand, separator)
+branded_query = brand_query(
+                            all_queries_in_a_dict['request_history'],
+                            variables_from_ini_in_dic['tables'],
+                            brand,
+                            variables_from_ini_in_dic['separator']
+                            )
 sql_query = pd.read_sql(branded_query, conn)
 dfrqpmk = pd.DataFrame(sql_query)
-# dfrq.loc[dfrq['read'] == 'Y'].loc[dfrq['entreprise'] == 'CGI'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
-# plt.savefig(backup_path+brand+separator+brand+separator+'CGI_view.jpg')
-# dfrq.loc[dfrq['write'] == 'Y'].loc[dfrq['entreprise'] == 'CGI'].loc[dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrq['access_year_week'], dfrq['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
-# plt.savefig(backup_path+brand+separator+brand+separator+'CGI_contribute.jpg')
-dfrqpmk.loc[dfrqpmk['read'] == 'Y'].loc[dfrqpmk['entreprise'] == 'Pimkie'].loc[dfrqpmk['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrqpmk['access_year_week'], dfrqpmk['entreprise'], dfrqpmk['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
-plt.savefig(backup_path+brand+separator+brand+separator+'view.jpg')
-dfrqpmk.loc[dfrqpmk['write'] == 'Y'].loc[dfrqpmk['entreprise'] == 'Pimkie'].loc[dfrqpmk['doNotBotherWith_connectionReminder'] != 'Oui'].groupby([dfrqpmk['access_year_week'], dfrqpmk['entreprise'], dfrq['team']]).sum().plot.barh(stacked=True, title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)', figsize= (15,10), fontsize=13)
-plt.savefig(backup_path+brand+separator+brand+separator+'contribute.jpg')
+dfrqpmk.loc[dfrqpmk['read'] == 'Y'
+                ].loc[dfrqpmk['entreprise'] == 'Pimkie'
+                ].loc[dfrqpmk['doNotBotherWith_connectionReminder'] != 'Oui'
+                ].groupby(
+                            [dfrqpmk['access_year_week'],
+                            dfrqpmk['entreprise'],
+                            dfrqpmk['team']]
+                        ).sum().plot.barh(stacked=True,
+                                            title=f'{brand.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
+                                            figsize= (15,10),
+                                            fontsize=13)
+plt.savefig(backup_path+
+            'Instance-'+
+            brand+variables_from_ini_in_dic['separator']+
+            entreprise+
+            variables_from_ini_in_dic['separator']+
+            'view.jpg',
+            bbox_inches='tight')
+
+dfrqpmk.loc[dfrqpmk['write'] == 'Y'
+                ].loc[dfrqpmk['entreprise'] == 'Pimkie'
+                ].loc[dfrqpmk['doNotBotherWith_connectionReminder'] != 'Oui'
+                ].groupby(
+                            [dfrqpmk['access_year_week'],
+                            dfrqpmk['entreprise'],
+                            dfrq['team']]
+                        ).sum().plot.barh(stacked=True,
+                                            title=f'{brand.capitalize()} : CONTRIBUTE activity up to {current_date} (by Team, Year-WeekNumber)',
+                                            figsize= (15,10),
+                                            fontsize=13)
+plt.savefig(backup_path+
+            'Instance-'+
+            brand+variables_from_ini_in_dic['separator']+
+            entreprise+
+            variables_from_ini_in_dic['separator']+
+            'contribute.jpg',
+            bbox_inches='tight')
 
 #%%
 dfrq.groupby([dfrq['access_date_to_path'],dfrq['entreprise']]).sum().plot.bar()
