@@ -27,18 +27,21 @@ def main():
     if 'Sessions' not in config:
         logger.critical(f'The ini file {INIFILE} is malformed or does not exists. Exiting the application.')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>The inifile does not exists. Check the logs</b></Green></aaa>'))
+        fh.close()
         exit()
 
     variables_from_ini_in_dic = tools.create_main_variables_from_config([config])
     if variables_from_ini_in_dic is None:
         logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One of the entry in the ini file triggered a critical error. Exiting the application. Check the logs</b></Green></aaa>'))
+        fh.close()
         exit()
     logger.setLevel(variables_from_ini_in_dic['log_level'])
 
     if not tools.queries_are_ok(conninlist, [config], variables_from_ini_in_dic):
         logger.critical('One the query returned an error while being validated')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One the query returned an error while being validated. check The logs</b></Green></aaa>'))
+        fh.close()
         exit()
 
     helpers.are_all_files_ok()
@@ -58,6 +61,7 @@ def main():
     if conninlist[0] is None:
         logger.critical('Initialisation of the database failed. Exiting the application')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Initialisation of the database failed. Exiting the application. Check the logs</b></Green></aaa>'))
+        fh.close()                    
         exit()
 
     backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
@@ -73,11 +77,58 @@ def main():
         except EOFError:
             break
         else:
-            if not (helpers.processchoice(digit_input, conninlist, [config], variables_from_ini_in_dic)):
-                prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Something unexpected happened while processing the choice. Check the logs</b></Green></aaa>'))
-                exit()
-    print('GoodBye!')
-    fh.close()
+            match digit_input:
+                case 0:
+                    logger.info('Choice made : 0, quit the application')
+                    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b>Good Bye !</b></HotPink></aaa>'))
+                    fh.close()
+                    exit()
+                case 1: #backup the DB, then generate the indicators
+                    logger.info('Choice made : 1, generate the indicators')
+                    
+                    # Backup DB
+                    
+                    prompt_toolkit.print_formatted_text(
+                        prompt_toolkit.HTML(
+                            '<aaa bg="LightYellow"><HotPink><b>Backing uo the database.</b></HotPink></aaa>')
+                    )
+                    current_session, current_date = tools.create_current_session(
+                                                            variables_from_ini_in_dic['maindir'],
+                                                            variables_from_ini_in_dic['prefix'],
+                                                            variables_from_ini_in_dic['context'],
+                                                            variables_from_ini_in_dic['separator']
+                                                        )
+                    backup_full_path_name = current_session + variables_from_ini_in_dic['backup_name']
+                    if not process.backup_ok(conninlist, backup_full_path_name):
+                        prompt_toolkit.print_formatted_text(
+                            prompt_toolkit.HTML(
+                                '<aaa bg="DarkRed"><Green><b>Copy of the database has failed. Exiting the application. Check the logs</b></Green></aaa>')
+                        )
+                        fh.close()
+                        exit()
+                    prompt_toolkit.print_formatted_text(
+                        prompt_toolkit.HTML(
+                            '<aaa bg="LightYellow"><HotPink><b>The Database of current the session is here : %s</b></HotPink></aaa>' %backup_full_path_name )
+                    )
+
+                    # Generate the indicator Connected at least once
+
+                    prompt_toolkit.print_formatted_text(
+                        prompt_toolkit.HTML(
+                            '<aaa bg="LightYellow"><HotPink><b>Generating the indicator : Connected at least_once.</b></HotPink></aaa>')
+                    )
+                    if not (process.indicator_connected_at_least_once(
+                                        conninlist,
+                                        [config],
+                                        variables_from_ini_in_dic,
+                                        current_session,
+                                        current_date)):
+                        prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failed to properly compute this indicator  : Connected at least once . Check the logs</b></Green></aaa>'))
+
+                case 2: # generate the queries to insert users
+                    logger.info('Choice made : 2, generate the queries to insert users')
+                case _:
+                    pass
 
 if __name__ == '__main__':
     main()

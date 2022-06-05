@@ -1,9 +1,9 @@
 import logging
-import os
-import prompt_toolkit
 import map.tools as tools
 import pandas as pd
 import matplotlib.pyplot as plt
+import datetime as dt
+
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
@@ -24,47 +24,173 @@ def backup_ok(conninlist: list, backup_full_path_name) -> bool:
         mlogger.critical(f'Unexpected error in the function backup() : {be.args}')
         return False
 
+@tools.log_function_call
 def indicator_connected_at_least_once(conninlist: list, configinlist: list, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
     '''
-        Generate the indicator "Connect at least once"
+        Generate the indicator "Connected at least once"
         The goal is to follow if each of the declared users in map has connected at least once.
     '''
-    for brand in variables_from_ini_in_dic['retailers']:
-        branded_query = tools.brand_query(tools.get_queries(configinlist)['connected_at_least_once_v2'], variables_from_ini_in_dic['tables'], brand, variables_from_ini_in_dic['separator'])
-        sql_query = pd.read_sql(branded_query, conninlist[0])
-        df = pd.DataFrame(sql_query)
-        df.plot.barh(stacked=True, x='Teams', title=f'{brand.capitalize()} : status of connections on {current_date}', figsize= (12,7), fontsize=13)
-        plt.savefig(backup_path+brand+variables_from_ini_in_dic['separator']+'connected.jpg')
+    try:
+        for brand in variables_from_ini_in_dic['retailers']:
+            branded_query = tools.brand_query(tools.get_queries(configinlist)['connected_at_least_once_v2'],
+                                                variables_from_ini_in_dic['tables'],
+                                                brand, variables_from_ini_in_dic['separator'])
+            sql_query = pd.read_sql(branded_query, conninlist[0])
+            df = pd.DataFrame(sql_query)
+            try:
+                df.plot.barh(stacked=True,
+                            x='Teams',
+                            title=f'{brand.capitalize()} : status of connections on {current_date}',
+                            figsize= (12,7),
+                            fontsize=13)
+            except IndexError:
+                continue
+            plt.savefig(backup_path+
+                        brand+
+                        variables_from_ini_in_dic['separator']+
+                        current_date+
+                        'connected.jpg')
+        return True
+    except BaseException as be:
+        mlogger.critical(f'Unexpected error in the function indicator_connected_at_least_once() : {be.args}')
+        return False
 
 
 @tools.log_function_call
-def processchoice(digit: int, conninlist: list, configinlist: list, variables_from_ini_in_dic: dict) -> bool: 
+def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_weeks_to_remove: int) -> int:
+    '''
+        input a year, a week and a number of weeks to substracts.
+        output : year concatenated to the calculated week
+    '''
+    mlogger.info('input : year = {year}, week={week}, backward_in_week={backward_in_week}, number_of_weeks_to_remove = {number_of_weeks_to_remove}'.format(
+        year=year,
+        week=week,
+        backward_in_week=backward_in_week,
+        number_of_weeks_to_remove=number_of_weeks_to_remove)
+    )
+    theorical_week = week - number_of_weeks_to_remove
+    theorical_week = theorical_week - backward_in_week
+    if theorical_week <= 0:
+        week = 52 + theorical_week
+        year = year -1
+    else:
+        week = theorical_week
+        year = year
+    year_week = int(str(year) + str(week))
+    mlogger.info(f'output :{year_week}')
+    return  year_week
+
+@tools.log_function_call
+def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+    '''
+        Generate the indicator "usage"
+        The use of the last 4 weeks
+        break down by teams
+        
+    '''
     try:
-        match digit:
-            case 0:
-                mlogger.info('Choice made : 0, quit the application')
-                exit()
-            case 1: #generate the indicators
-                mlogger.info('Choice made : 1, generate the indicators')
-                current_session, current_date = tools.create_current_session(variables_from_ini_in_dic['maindir'],
-                                                                                variables_from_ini_in_dic['prefix'],
-                                                                                variables_from_ini_in_dic['context'],
-                                                                                variables_from_ini_in_dic['separator'])
-                backup_full_path_name = current_session + os.path.sep + variables_from_ini_in_dic['backup_name']
-                backup_path = current_session + os.path.sep
-                if not backup_ok(conninlist, backup_full_path_name):
-                    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Copy of the database has failed. Exiting the application. Check the logs</b></Green></aaa>'))
-                    exit()
-                prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b>The Database of current the session is here : %s</b></HotPink></aaa>' %backup_full_path_name ))
+        for retailer in variables_from_ini_in_dic['retailers']:
+            branded_query = tools.brand_query(tools.get_queries(configinlist)['request_history_v2'],
+                                                variables_from_ini_in_dic['tables'],
+                                                retailer, variables_from_ini_in_dic['separator'])
+            sql_query = pd.read_sql(branded_query, conninlist[0])
+            dfrq = pd.DataFrame(sql_query)
 
-                if [indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, backup_path, current_date)]:
-                    pass
+            # enrich the dataframe with the values needed to the indicator
+            #dfrq["access_year"] = list(map(lambda x: str(x[0:4]), dfrq['access_date_to_path']))
+            dfrq["access_year"] = dfrq['access_date_to_path'].map(lambda x: str(x[0:4]))
+            dfrq["access_month"] = dfrq['access_date_to_path'].map(lambda x: str(x[5:7]))
+            dfrq["access_day"] = dfrq['access_date_to_path'].map(lambda x: str(x[8:]))
+            dfrq["access_week"] = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
+            dfrq["access_year_week"] = dfrq['access_year'].map(str) + dfrq['access_week'].map(str)
+            dfrq['access_year_month'] = dfrq['access_year'].map(str) + dfrq['access_month'].map(str)
 
-            case 2: # generate the queries to insert users
-                mlogger.info('Choice made : 2, generate the queries to insert users')
-            case _:
-                pass
+
+            # get the most recent usage of CGI MAP and filter the dataframe
+            year = int(dfrq['access_year'].max())
+            dly = dfrq.loc[dfrq['access_year'] == dfrq['access_year'].max()]
+            week = int(dly['access_week'].max())
+            backward_in_week = int(variables_from_ini_in_dic['backward_in_week'])
+            number_of_weeks_to_remove = int(variables_from_ini_in_dic['number_of_weeks_to_remove'])
+            year_week = year_week_to_begin(year,
+                                            week,
+                                                backward_in_week,
+                                                number_of_weeks_to_remove)
+
+            filtered_dfrq = dfrq.loc[
+                        dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
+                            dfrq['access_year_week'].map(int) >= year_week
+                        ]
+
+            if len(filtered_dfrq.index) == 0:
+                continue
+
+            # for each retailer and cgi compute the views and contribution
+            retailers_and_cgi = variables_from_ini_in_dic['retailers'] + ['cgi']
+            for entreprise in retailers_and_cgi:
+
+                # compute the count of "read only" usage
+
+                try:
+                    filtered_dfrq.loc[
+                                filtered_dfrq['read'] == 'Y'
+                            ].loc[
+                                    filtered_dfrq['entreprise'].str.lower() == str(entreprise).lower()
+                                ].groupby(
+                                            [
+                                                filtered_dfrq['access_year_week'],
+                                                filtered_dfrq['entreprise'],
+                                                filtered_dfrq['team']
+                                            ]
+                                        ).count().plot.barh(y='access_date_to_path',
+                                                            stacked=True,
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
+                                                            figsize= (15,10),
+                                                            fontsize=13)
+                except IndexError:
+                    continue
+
+                plt.savefig(backup_path+
+                    'Instance-'+
+                    retailer+variables_from_ini_in_dic['separator']+
+                    entreprise+
+                    variables_from_ini_in_dic['separator']+
+                    current_date+
+                    'view.jpg',
+                    bbox_inches='tight')
+
+                # compute the count of "write" usage
+
+                try:
+                    filtered_dfrq.loc[
+                                filtered_dfrq['write'] == 'Y'
+                            ].loc[
+                                    filtered_dfrq['entreprise'].str.lower() == str(entreprise).lower()
+                                ].groupby(
+                                            [
+                                                filtered_dfrq['access_year_week'],
+                                                filtered_dfrq['entreprise'],
+                                                filtered_dfrq['team']
+                                            ]
+                                        ).count().plot.barh(y='access_date_to_path',
+                                                            stacked=True,
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
+                                                            figsize= (15,10),
+                                                            fontsize=13)
+                except IndexError:
+                    continue
+
+                plt.savefig(backup_path+
+                    'Instance-'+
+                    retailer+variables_from_ini_in_dic['separator']+
+                    entreprise+
+                    variables_from_ini_in_dic['separator']+
+                    current_date+
+                    'contribute.jpg',
+                    bbox_inches='tight')
         return True
     except BaseException as be:
-        mlogger.critical(f'Unexpected error in the function backup() : {be.args}')
+        mlogger.critical(f'Unexpected error in the function usage_by_teams() : {be.args}')
         return False
+
+    

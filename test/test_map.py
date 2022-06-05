@@ -1,10 +1,6 @@
-from genericpath import exists
 import os
 import configparser
-from sqlite3 import Connection, OperationalError
-import sqlite3
 import sys
-from tkinter.messagebox import NO
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(PROJECT_ROOT)
@@ -49,6 +45,10 @@ def init_ok():
     assert len(variables_from_ini_in_dic['backup_name']) > 0
     logger.info('content of variable log_level : {v}'.format(v=variables_from_ini_in_dic['log_level']))
     assert len(variables_from_ini_in_dic['log_level']) > 0
+    logger.info('content of variable backward_in_week : {v}'.format(v=variables_from_ini_in_dic['backward_in_week']))
+    assert len(variables_from_ini_in_dic['backward_in_week']) > 0
+    logger.info('content of variable number_of_weeks_to_remove : {v}'.format(v=variables_from_ini_in_dic['number_of_weeks_to_remove']))
+    assert len(variables_from_ini_in_dic['number_of_weeks_to_remove']) > 0
 
     #Thirdly, load all the files in the database
     conn = tools.initialize_db(':memory:',
@@ -85,17 +85,24 @@ if __name__=="__main__":
                                                                     variables_from_ini_in_dic['context'],
                                                                     variables_from_ini_in_dic['separator'])
     assert current_session is not None                                                                    
-    backup_full_path_name = current_session + os.path.sep + variables_from_ini_in_dic['backup_name']
+    backup_full_path_name = current_session + variables_from_ini_in_dic['backup_name']
     assert mapprocess.backup_ok(conninlist, backup_full_path_name)
 
 
     backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
     assert mapprocess.backup_ok(conninlist, backup_full_path_name)
-        
-
     assert tools.queries_are_ok(conninlist, configinlist, variables_from_ini_in_dic)
+    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session, current_date)
+    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session, current_date)
 
-    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic)
+    y = 2022
+    w = 20
+    b = 4
+    r = 0
+    year_week = mapprocess.year_week_to_begin(y, w, b, r)
+    assert year_week == 202216
+
+    assert mapprocess.usage_by_teams(conninlist, configinlist, variables_from_ini_in_dic, current_session, current_date)
 
 
 

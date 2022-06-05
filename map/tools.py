@@ -42,6 +42,8 @@ def check_ini_files_and_return_config_object(inifile: str) -> list:
             and len(config['Sessions']['prefix']) > 0
             and len(config['Sessions']['context']) > 0
             and len(config['Sessions']['backup_name']) > 0
+            and len(config['Sessions']['backward_in_week']) > 0
+            and len(config['Sessions']['number_of_weeks_to_remove']) > 0
             and len(config['Main']['log_level'])
             and (config['Main']['log_level'] == 'DEBUG'
                     or config['Main']['log_level'] == 'INFO'
@@ -77,6 +79,10 @@ def check_ini_files_and_return_config_object(inifile: str) -> list:
             mlogger.critical('ini file lacks the entry context in the Sessions section')
         if 'backup_name' not in config['Sessions']:
             mlogger.critical('ini file lacks the entry backup_name in the Sessions section')
+        if 'backward_in_week' not in config['Sessions']:
+            mlogger.critical('ini file lacks the entry backward_in_week in the Sessions section')
+        if 'number_of_weeks_to_remove' not in config['Sessions']:
+            mlogger.critical('ini file lacks the entry number_of_weeks_to_remove in the Sessions section')
         if (config['Main']['log_level'] not in ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')):
             mlogger.critical('the entry log_level is not amongst DEBUG, INFO, WARNING, ERROR, CRITICAL')
         return None
@@ -111,6 +117,8 @@ def create_main_variables_from_config(configinlist: list) -> dict:
         variables_from_ini_in_dic['prefix'] = config['Sessions']['prefix']
         variables_from_ini_in_dic['context'] = config['Sessions']['context']
         variables_from_ini_in_dic['backup_name'] = config['Sessions']['backup_name']
+        variables_from_ini_in_dic['backward_in_week'] = config['Sessions']['backward_in_week']
+        variables_from_ini_in_dic['number_of_weeks_to_remove'] = config['Sessions']['number_of_weeks_to_remove']
 
         retailers_tables = dict()
         # build the name of the tables for all retailers. e.g. jules_adm_role
@@ -201,7 +209,7 @@ def create_current_session(maindir: str, prefix: str, context: str, separator: s
             path_to_create = path_to_find+separator+str((max(sessions)+1))
             os.mkdir(path_to_create)
         mlogger.info(f'function get_current_session : execution OK. Returning path to create "{path_to_create}" as expected')
-        return path_to_create, current_date
+        return path_to_create+os.path.sep, current_date
     except BaseException as be:
         mlogger.critical(f'unexpected error in the function get_current_session() : {be.args}')
         return None, None

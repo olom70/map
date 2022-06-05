@@ -2,6 +2,7 @@
 from calendar import week
 import configparser
 import os
+from turtle import backward
 # ------------
 ## First STEP : initialize
 #-------------
@@ -76,6 +77,33 @@ del dfrq["req_user_date"]
 dfrq.insert(1, "req_user_date", dfrq["req_user"]  + dfrq['access_date_to_path'])
 dfrq
 #%%
+def year_week_to_begin(year: int, week:int, backward_in_week: int) -> int:
+    theorical_week = week - backward_in_week
+    if theorical_week <= 0:
+        week = 52 + theorical_week
+        year = year -1
+    else:
+        week = theorical_week
+        year = year
+    return  int(str(year) + str(week))
+
+y = 2022
+w = 2
+b = 4
+year_week = year_week_to_begin(y, w, b)
+print(y)
+print(w)
+print(b)
+print("---")
+print(year_week)
+
+year = dfrq['access_year'].max()
+print(year)
+dly = dfrq.loc[dfrq['access_year'] == dfrq['access_year'].max()]
+week = dly['access_week'].max()
+print(week)
+
+#%%
 # ------------
 ## Enrich dataframe
 #-------------
@@ -96,17 +124,17 @@ dfrq["access_year"] = dfrq['access_date_to_path'].map(lambda x: str(x[0:4]))
 dfrq["access_month"] = dfrq['access_date_to_path'].map(lambda x: str(x[5:7]))
 dfrq["access_day"] = dfrq['access_date_to_path'].map(lambda x: str(x[8:]))
 dfrq["access_week"] = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
-dfrq["access_year_week"] = dfrq['access_year'].map(str) + '-' + dfrq['access_week'].map(str)
-dfrq['access_year_month'] = dfrq['access_year'].map(str) + '-' + dfrq['access_month'].map(str)
-dfrq
+dfrq["access_year_week"] = dfrq['access_year'].map(str) + dfrq['access_week'].map(str)
+dfrq['access_year_month'] = dfrq['access_year'].map(str) + dfrq['access_month'].map(str)
 dfrq.loc[
         dfrq['read'] == 'Y'].loc[
             dfrq['entreprise'] == 'CGI'].loc[
                 dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
-                    dfrq['access_week'] < 21
+                    dfrq['access_year_week'].map(int) >= year_week
                 ]
 
-
+#%%
+dfrq
 
 #%%
 # ------------

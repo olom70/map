@@ -234,3 +234,8 @@ for x in l:
     print(f'l:{x}')
 f(None)
 print(l)
+
+#%%
+
+retailers_and_cgi = ['a', 'b'] + ['cgi']
+print(retailers_and_cgi)
