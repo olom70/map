@@ -21,7 +21,7 @@ def backup_ok(conninlist: list, backup_full_path_name) -> bool:
         else:
             mlogger.critical(f"The copy of the database in {backup_full_path_name} has failed")
     except BaseException as be:
-        mlogger.critical(f'Unexpected error in the function backup() : {be.args}')
+        mlogger.critical(f'Unexpected error in the function backup() : {type(be)}{be.args}')
         return False
 
 @tools.log_function_call
@@ -52,7 +52,7 @@ def indicator_connected_at_least_once(conninlist: list, configinlist: list, vari
                         'connected.jpg')
         return True
     except BaseException as be:
-        mlogger.critical(f'Unexpected error in the function indicator_connected_at_least_once() : {be.args}')
+        mlogger.critical(f'Unexpected error in the function indicator_connected_at_least_once() : {type(be)}{be.args}')
         return False
 
 
@@ -190,7 +190,7 @@ def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_d
                     bbox_inches='tight')
         return True
     except BaseException as be:
-        mlogger.critical(f'Unexpected error in the function usage_by_teams() : {be.args}')
+        mlogger.critical(f'Unexpected error in the function usage_by_teams() : {type(be)}{be.args}')
         return False
 
     

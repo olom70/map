@@ -1,8 +1,8 @@
 #%%
 from calendar import week
 import configparser
+from dis import code_info
 import os
-from turtle import backward
 # ------------
 ## First STEP : initialize
 #-------------
@@ -22,6 +22,14 @@ backup_path, current_date = create_current_session(variables_from_ini_in_dic['ma
                                                 variables_from_ini_in_dic['context'],
                                                 variables_from_ini_in_dic['separator'])
 all_queries_in_a_dict =  get_queries([config])
+#%%
+x = dict(iter(config.items('Sessions')))
+print(x)
+x.update(dict(iter(config.items('Main'))))
+print(x)
+x['retailers'] = x['retailers'].split()
+print(x['retailers'])
+
 #%%
 # ------------
 ## 2nd STep : back up DB
@@ -77,6 +85,9 @@ del dfrq["req_user_date"]
 dfrq.insert(1, "req_user_date", dfrq["req_user"]  + dfrq['access_date_to_path'])
 dfrq
 #%%
+#
+# Setting the beginning of the time frame
+#
 def year_week_to_begin(year: int, week:int, backward_in_week: int) -> int:
     theorical_week = week - backward_in_week
     if theorical_week <= 0:
@@ -88,7 +99,7 @@ def year_week_to_begin(year: int, week:int, backward_in_week: int) -> int:
     return  int(str(year) + str(week))
 
 y = 2022
-w = 2
+w = 22
 b = 4
 year_week = year_week_to_begin(y, w, b)
 print(y)
@@ -126,15 +137,41 @@ dfrq["access_day"] = dfrq['access_date_to_path'].map(lambda x: str(x[8:]))
 dfrq["access_week"] = list(map(lambda x: dt.datetime.strptime(x, '%Y-%m-%d').isocalendar().week, dfrq["access_date_to_path"]))
 dfrq["access_year_week"] = dfrq['access_year'].map(str) + dfrq['access_week'].map(str)
 dfrq['access_year_month'] = dfrq['access_year'].map(str) + dfrq['access_month'].map(str)
-dfrq.loc[
-        dfrq['read'] == 'Y'].loc[
-            dfrq['entreprise'] == 'CGI'].loc[
-                dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
-                    dfrq['access_year_week'].map(int) >= year_week
-                ]
 
 #%%
-dfrq
+dfrqaccess = dfrq
+dfrqaccess.loc[
+            dfrqaccess['read'] == 'Y'
+          ].loc[
+                dfrqaccess['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
+                    dfrq['access_year_week'].map(int) >= year_week
+            ].groupby(
+                    [
+                        dfrqaccess['access_year_week']
+                    ]
+                ).count().plot.barh(y='access_date_to_path',
+                                    stacked=True,
+                                    title=f'{brand.capitalize()} : VIEW activity (no updates). by YearWeekNumber)',
+                                    figsize= (15,10),
+                                    fontsize=13)
+
+#%%
+dfrqaccess = dfrq
+dfrqaccess.loc[
+            dfrqaccess['write'] == 'Y'
+          ].loc[
+                dfrqaccess['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
+                    dfrq['access_year_week'].map(int) >= year_week
+            ].groupby(
+                    [
+                        dfrqaccess['access_year_week']
+                    ]
+                ).count().plot.barh(y='access_date_to_path',
+                                    stacked=True,
+                                    title=f'{brand.capitalize()} : VIEW activity (no updates). by YearWeekNumber)',
+                                    figsize= (15,10),
+                                    fontsize=13)
+
 
 #%%
 # ------------
@@ -150,8 +187,9 @@ dfrqjules.loc[
           ].loc[
                 dfrqjules['entreprise'].str.lower() == entreprise
                ].loc[
-                    dfrqjules['doNotBotherWith_connectionReminder'] != 'Oui'
-                 ].groupby(
+                    dfrqjules['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
+                        dfrq['access_year_week'].map(int) >= year_week
+                ].groupby(
                         [
                             dfrqjules['access_year_week'],
                             dfrqjules['entreprise'],

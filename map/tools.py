@@ -95,7 +95,14 @@ def create_main_variables_from_config(configinlist: list) -> dict:
     '''
     try:
         config = configinlist[0]
-        variables_from_ini_in_dic = dict()
+
+        variables_from_ini_in_dic = dict(iter(config.items('Main')))
+        variables_from_ini_in_dic.update(dict(iter(config.items('Sessions'))))
+        
+        variables_from_ini_in_dic['retailers'] = variables_from_ini_in_dic['retailers'].split()
+        variables_from_ini_in_dic['toolkit_tables'] = variables_from_ini_in_dic['toolkit_tables'].split()
+        variables_from_ini_in_dic['tables'] = variables_from_ini_in_dic['tables'].split()
+
         if (platform.system() == 'Linux'):
             variables_from_ini_in_dic['maindir'] = config['Main']['mainDirLinux']
         else:
@@ -107,18 +114,6 @@ def create_main_variables_from_config(configinlist: list) -> dict:
         variables_from_ini_in_dic['iniFilesDir'] = variables_from_ini_in_dic['maindir'] + os.path.sep + config['Main']['iniFilesDir']
         if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['iniFilesDir'], tail='', typeExtraction='mainDir', dir='dir'):
             raise ValueError('mainpath {iniFilesDir} not found'.format(mainDir=variables_from_ini_in_dic['iniFilesDir']))    
-
-        variables_from_ini_in_dic['separator'] = config['Main']['Separator']
-        variables_from_ini_in_dic['retailers'] = config['Main']['retailers'].split()
-        variables_from_ini_in_dic['tables'] = config['Main']['tables'].split()
-        variables_from_ini_in_dic['toolkit_tables'] = config['Main']['toolkit_tables'].split()
-        variables_from_ini_in_dic['file_ext'] = config['Main']['file_ext']
-        variables_from_ini_in_dic['log_level'] = config['Main']['log_level']
-        variables_from_ini_in_dic['prefix'] = config['Sessions']['prefix']
-        variables_from_ini_in_dic['context'] = config['Sessions']['context']
-        variables_from_ini_in_dic['backup_name'] = config['Sessions']['backup_name']
-        variables_from_ini_in_dic['backward_in_week'] = config['Sessions']['backward_in_week']
-        variables_from_ini_in_dic['number_of_weeks_to_remove'] = config['Sessions']['number_of_weeks_to_remove']
 
         retailers_tables = dict()
         # build the name of the tables for all retailers. e.g. jules_adm_role
@@ -148,9 +143,8 @@ def create_main_variables_from_config(configinlist: list) -> dict:
         mlogger.critical(f'One of the file specified in the .ini does not exist : {vr.args[0]}')
         return None
     except BaseException as be:
-        mlogger.critical(f'unexpected error in the function create_main_variables_from_config() : {be.args}')
+        mlogger.critical(f'unexpected error in the function create_main_variables_from_config() : {type(be)}{be.args}')
         return None
-
 
 @log_function_call
 def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, toolkit_tables: str, file_ext: str, iniFilesDir: str) -> list:
@@ -176,7 +170,7 @@ def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, too
         mlogger.info('function initialize_db : execution OK. Returning connection object as expected')
         return [conn]
     except BaseException as be:
-        mlogger.critical(f'U initialize_db() : {be.args}')
+        mlogger.critical(f'U initialize_db() : {type(be)}{be.args}')
         return None
 
 @log_function_call
@@ -211,7 +205,7 @@ def create_current_session(maindir: str, prefix: str, context: str, separator: s
         mlogger.info(f'function get_current_session : execution OK. Returning path to create "{path_to_create}" as expected')
         return path_to_create+os.path.sep, current_date
     except BaseException as be:
-        mlogger.critical(f'unexpected error in the function get_current_session() : {be.args}')
+        mlogger.critical(f'unexpected error in the function get_current_session() : {type(be)}{be.args}')
         return None, None
 
 def progress(status, remaining, total):
@@ -231,7 +225,7 @@ def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str )
         mlogger.info('function backup_in_memory_db_to_disk : execution OK. Returning backup db connection as expected')
         return [conn_backup]
     except BaseException as be:
-        mlogger.critical(f'unexpected error in the function backup_in_memory_db_to_disk() : {be.args}')
+        mlogger.critical(f'unexpected error in the function backup_in_memory_db_to_disk() : {type(be)}{be.args}')
         return None
 
 @log_function_call
@@ -250,7 +244,7 @@ def get_queries(configinlist: list) -> dict:
             return None
         return queries_in_a_dict
     except BaseException as be:
-        mlogger.critical(f'unexpected error in the function get_queries() : {be.args}')
+        mlogger.critical(f'unexpected error in the function get_queries() : {type(be)}{be.args}')
         return None
 
 @log_function_call
@@ -274,7 +268,7 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
         mlogger.info(f'branded query returned : {branded_query}')
         return branded_query
     except BaseException as be:
-        mlogger.critical(f'unexpected error in the function brand_query() : {be.args}')
+        mlogger.critical(f'unexpected error in the function brand_query() : {type(be)}{be.args}')
         return None
 
 @log_function_call
@@ -298,5 +292,5 @@ def queries_are_ok(conninlist: list, configinlist: list, variables_from_ini_in_d
             assert len(cur.execute(branded_query).fetchall()) > 0
         return True
     except BaseException as be:
-        mlogger.critical(f'unexpected error in the function check_query() : {be.args}')
+        mlogger.critical(f'unexpected error in the function check_query() : {type(be)}{be.args}')
         return False
