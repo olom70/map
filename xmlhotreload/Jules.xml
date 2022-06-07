@@ -19,7 +19,7 @@
         <infoTab title="Documentation" contentType="HTML_VIEW" contentName="documentation"/>
     </infoPopup>
     <infos>
-        <appTitle>MAP - Instance Tests</appTitle>
+        <appTitle>MAP - Jules Bizbee</appTitle>
         <companyName>CGI</companyName>
         <copyrightYear>2022</copyrightYear>
     </infos>
@@ -898,7 +898,7 @@
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
-                                <outgoingEdgeType targetNodeTypes="BusinessObject,Application,MacroApplication,PartnerApplication" types="uses" >
+                                <outgoingEdgeType targetNodeTypes="BusinessObject,Application,MacroApplication,PartnerApplication,Schema" types="uses" >
                                     <metadatas>
                                         <metadata id="description" />
                                     </metadatas>
@@ -937,8 +937,7 @@
                                 <metadata id="status" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="is source of,ships" />
-                                <outgoingEdgeType targetNodeTypes="LogicalFlow" types="ships" />
+                                <outgoingEdgeType targetNodeTypes="TechnicalFlow,LogicalFlow" types="is source of,ships" />
                                 <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" />
                                 <outgoingEdgeType targetNodeTypes="File" types="contains" />
                             </outgoingEdgeTypes>
@@ -1000,7 +999,7 @@
                                 <metadata id="contact" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,Partner,PartnerApplication" types="has for target" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,Partner,PartnerApplication,Middleware" types="has for target" />
                                 <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" />
                                 <outgoingEdgeType targetNodeTypes="TechnicalFlow" types="composed of" />
                             </outgoingEdgeTypes>
@@ -1036,6 +1035,12 @@
                                 <metadata id="SSHServer" />
                                 <metadata id="typeOfRDBMS" />
                                 <metadata id="portNumber" />
+                                <metadata id="VMFixe">
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="fullConnectionString" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -1077,7 +1082,16 @@
                                         <value>ODI</value>
                                         <value>PLSQL</value>
                                         <value>MediaTransfer</value>
+                                        <value>Service Web Synchrone (ex :API REST/JSON)</value>
+                                        <value>Message asynchrone (ex :Message Kafka)</value>
+                                        <value>FTP</value>
                                         <value>Autre</value>
+                                    </allowedValues>
+                                </metadata>
+                                <metadata id="Actif">
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
                                     </allowedValues>
                                 </metadata>
                             </metadatas>
