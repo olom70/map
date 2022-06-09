@@ -915,7 +915,7 @@
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
-                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" >
+                                <outgoingEdgeType targetNodeTypes="BusinessObject,Schema" types="uses" >
                                     <metadatas>
                                         <metadata id="description" />
                                     </metadatas>
@@ -938,7 +938,7 @@
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="TechnicalFlow,LogicalFlow" types="is source of,ships" />
-                                <outgoingEdgeType targetNodeTypes="BusinessObject" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="BusinessObject,Schema" types="uses" />
                                 <outgoingEdgeType targetNodeTypes="File" types="contains" />
                             </outgoingEdgeTypes>
                         </nodeType>
