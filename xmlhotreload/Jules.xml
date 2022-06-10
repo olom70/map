@@ -581,7 +581,7 @@
             <queryDefinition execute="true" visibility="none">
                 <query>
                     <simpleQuery>
-                        <from>Application</from>
+                        <from>Application, PartnerApplication</from>
                         <return>*</return>
                     </simpleQuery>
                 </query>
@@ -612,8 +612,8 @@
                 <query>
                     <simpleQuery>
                         <from>Vendor</from>
-                        <follow>Vendor>>provides>>Application</follow>
-                        <return>Vendor>>provides>>Application</return>
+                        <follow>Vendor>>provides>>Application,PartnerApplication</follow>
+                        <return>Vendor>>provides>>Application,PartnerApplication</return>
                     </simpleQuery>
                 </query>
             </queryDefinition>
@@ -623,7 +623,7 @@
             <queryDefinition execute="true" visibility="none">
                 <query>
                     <simpleQuery>
-                        <from>Application</from>
+                        <from>Application,PartnerApplication</from>
                         <return>*</return>
                     </simpleQuery>
                 </query>
@@ -1044,7 +1044,7 @@
                                 <metadata id="fullConnectionString" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="Database" types="hosts" />
+                                <outgoingEdgeType targetNodeTypes="Database,Application" types="hosts" />
                                 <outgoingEdgeType targetNodeTypes="FileDirectory" types="contains" />
                             </outgoingEdgeTypes>
                         </nodeType>
