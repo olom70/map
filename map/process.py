@@ -1,9 +1,14 @@
+from email.policy import default
 import logging
+from numpy import var
 import map.tools as tools
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dt
-
+import decouple
+import smtplib
+import ssl
+import email.message as message
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
@@ -55,6 +60,36 @@ def indicator_connected_at_least_once(conninlist: list, configinlist: list, vari
         mlogger.critical(f'Unexpected error in the function indicator_connected_at_least_once() : {type(be)}{be.args}')
         return False
 
+def send_email(variables_from_ini_in_dic: list, current_session_path: str) -> bool:
+    '''
+        Send by email all the images in a folder
+        https://github.com/kootenpv/yagmail#magical-contents
+    '''
+    try:
+        mypassword = decouple.config('gmail_password', default=None)
+        mysmtp = decouple.config('smtp', default=None)
+        myport = int(decouple.config('port', default=None))
+        if (mypassword is None or mysmtp is None or myport is None):
+            mlogger.warning('Gmail config not found. Unable to generate mail')
+        else:
+            mymail = message.EmailMessage()
+            mymail['Subject'] = variables_from_ini_in_dic['title']
+            mymail['From'] = variables_from_ini_in_dic['from']
+            mymail['To'] = variables_from_ini_in_dic['to']
+            mymail.set_content = gmail_beginning = variables_from_ini_in_dic['beginning'] + variables_from_ini_in_dic['ending']
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(mysmtp, myport, context=context) as smtp:
+                smtp.login(variables_from_ini_in_dic['from'], mypassword)
+                smtp.sendmail(variables_from_ini_in_dic['from'], variables_from_ini_in_dic['to'], mymail.as_string())
+            return True
+
+    except BaseException as be:
+        mlogger.critical(f'Unexpected error in the function send_email() : {type(be)}{be.args}')
+        return False
+
+
+
+
 
 @tools.log_function_call
 def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_weeks_to_remove: int) -> int:
@@ -81,11 +116,11 @@ def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_wee
     return  year_week
 
 @tools.log_function_call
-def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+def map_usage(conninlist: list, configinlist: list, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
     '''
         Generate the indicator "usage"
         The use of the last 4 weeks
-        break down by teams
+        break down by teams the nby entreprise
         
     '''
     try:
@@ -96,7 +131,7 @@ def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_d
             sql_query = pd.read_sql(branded_query, conninlist[0])
             dfrq = pd.DataFrame(sql_query)
 
-            # enrich the dataframe with the values needed to the indicator
+            # enrich the dataframe with the values needed by the indicator
             #dfrq["access_year"] = list(map(lambda x: str(x[0:4]), dfrq['access_date_to_path']))
             dfrq["access_year"] = dfrq['access_date_to_path'].map(lambda x: str(x[0:4]))
             dfrq["access_month"] = dfrq['access_date_to_path'].map(lambda x: str(x[5:7]))
@@ -128,9 +163,9 @@ def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_d
             # for each retailer and cgi compute the views and contribution
             retailers_and_cgi = variables_from_ini_in_dic['retailers'] + ['cgi']
             for entreprise in retailers_and_cgi:
-
-                # compute the count of "read only" usage
-
+                # ---------------------------------------
+                # compute the count of "read only" usage (Entreprise / team)
+                # ---------------------------------------
                 try:
                     filtered_dfrq.loc[
                                 filtered_dfrq['read'] == 'Y'
@@ -142,25 +177,29 @@ def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_d
                                                 filtered_dfrq['entreprise'],
                                                 filtered_dfrq['team']
                                             ]
-                                        ).count().plot.barh(y='access_date_to_path',
+                                        ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, YearWeekNumber)',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
                     continue
 
                 plt.savefig(backup_path+
-                    'Instance-'+
-                    retailer+variables_from_ini_in_dic['separator']+
+                    retailer
+                    +variables_from_ini_in_dic['separator']+
                     entreprise+
                     variables_from_ini_in_dic['separator']+
                     current_date+
-                    'view.jpg',
+                    variables_from_ini_in_dic['separator']+
+                    'byTeam'+
+                    variables_from_ini_in_dic['separator']+
+                    'view'+
+                    '.jpg',
                     bbox_inches='tight')
-
-                # compute the count of "write" usage
-
+                # ---------------------------------------
+                # compute the count of "write" usage (Entreprise / team)
+                # ---------------------------------------
                 try:
                     filtered_dfrq.loc[
                                 filtered_dfrq['write'] == 'Y'
@@ -172,22 +211,93 @@ def usage_by_teams(conninlist: list, configinlist: list, variables_from_ini_in_d
                                                 filtered_dfrq['entreprise'],
                                                 filtered_dfrq['team']
                                             ]
-                                        ).count().plot.barh(y='access_date_to_path',
+                                        ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, Year-WeekNumber)',
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, YearWeekNumber)',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
                     continue
 
                 plt.savefig(backup_path+
-                    'Instance-'+
-                    retailer+variables_from_ini_in_dic['separator']+
+                    retailer
+                    +variables_from_ini_in_dic['separator']+
                     entreprise+
                     variables_from_ini_in_dic['separator']+
                     current_date+
-                    'contribute.jpg',
+                    variables_from_ini_in_dic['separator']+
+                    'byTeam'+
+                    variables_from_ini_in_dic['separator']+
+                    'contribute'+
+                    '.jpg',
                     bbox_inches='tight')
+                # ---------------------------------------
+                # compute the count of "read only" usage (Entreprise)
+                # ---------------------------------------
+                try:
+                    filtered_dfrq.loc[
+                                filtered_dfrq['read'] == 'Y'
+                            ].loc[
+                                    filtered_dfrq['entreprise'].str.lower() == str(entreprise).lower()
+                                ].groupby(
+                                            [
+                                                filtered_dfrq['access_year_week'],
+                                                filtered_dfrq['entreprise'],
+                                            ]
+                                        ).count().plot.bar(y='access_date_to_path',
+                                                            stacked=True,
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Entreprise, YearWeekNumber)',
+                                                            figsize= (15,10),
+                                                            fontsize=13)
+                except IndexError:
+                    continue
+
+                plt.savefig(backup_path+
+                    retailer
+                    +variables_from_ini_in_dic['separator']+
+                    entreprise+
+                    variables_from_ini_in_dic['separator']+
+                    current_date+
+                    variables_from_ini_in_dic['separator']+
+                    'byEntreprise'+
+                    variables_from_ini_in_dic['separator']+
+                    'view'+
+                    '.jpg',
+                    bbox_inches='tight')
+                # ---------------------------------------
+                # compute the count of "write" usage (Entreprise / team)
+                # ---------------------------------------
+                try:
+                    filtered_dfrq.loc[
+                                filtered_dfrq['write'] == 'Y'
+                            ].loc[
+                                    filtered_dfrq['entreprise'].str.lower() == str(entreprise).lower()
+                                ].groupby(
+                                            [
+                                                filtered_dfrq['access_year_week'],
+                                                filtered_dfrq['entreprise'],
+                                            ]
+                                        ).count().plot.bar(y='access_date_to_path',
+                                                            stacked=True,
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Entreprise, YearWeekNumber)',
+                                                            figsize= (15,10),
+                                                            fontsize=13)
+                except IndexError:
+                    continue
+
+                plt.savefig(backup_path+
+                    retailer
+                    +variables_from_ini_in_dic['separator']+
+                    entreprise+
+                    variables_from_ini_in_dic['separator']+
+                    current_date+
+                    variables_from_ini_in_dic['separator']+
+                    'byEntreprise'+
+                    variables_from_ini_in_dic['separator']+
+                    'contribute'+
+                    '.jpg',
+                    bbox_inches='tight')
+
         return True
     except BaseException as be:
         mlogger.critical(f'Unexpected error in the function usage_by_teams() : {type(be)}{be.args}')

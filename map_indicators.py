@@ -20,6 +20,7 @@ logger.addHandler(fh)
 
 def main():
     logger.info('Start. Application is initializing')
+
     INIFILE = 'map_indicators.ini'
     logger.info(f'The name of the ini file is {INIFILE}')
     config = configparser.ConfigParser()
@@ -37,12 +38,6 @@ def main():
         fh.close()
         exit()
     logger.setLevel(variables_from_ini_in_dic['log_level'])
-
-    if not tools.queries_are_ok(conninlist, [config], variables_from_ini_in_dic):
-        logger.critical('One the query returned an error while being validated')
-        prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One the query returned an error while being validated. check The logs</b></Green></aaa>'))
-        fh.close()
-        exit()
 
     helpers.are_all_files_ok()
     input = prompt_toolkit.prompt('Your choice : (y)es/ (c)ancel) : ', validator=helpers.validator_yn)
@@ -62,6 +57,12 @@ def main():
         logger.critical('Initialisation of the database failed. Exiting the application')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Initialisation of the database failed. Exiting the application. Check the logs</b></Green></aaa>'))
         fh.close()                    
+        exit()
+
+    if not tools.queries_are_ok(conninlist, [config], variables_from_ini_in_dic):
+        logger.critical('One the query returned an error while being validated')
+        prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One the query returned an error while being validated. check The logs</b></Green></aaa>'))
+        fh.close()
         exit()
 
     backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
@@ -92,13 +93,13 @@ def main():
                         prompt_toolkit.HTML(
                             '<aaa bg="LightYellow"><HotPink><b>Backing uo the database.</b></HotPink></aaa>')
                     )
-                    current_session, current_date = tools.create_current_session(
+                    current_session_path, current_date = tools.create_current_session(
                                                             variables_from_ini_in_dic['maindir'],
                                                             variables_from_ini_in_dic['prefix'],
                                                             variables_from_ini_in_dic['context'],
                                                             variables_from_ini_in_dic['separator']
                                                         )
-                    backup_full_path_name = current_session + variables_from_ini_in_dic['backup_name']
+                    backup_full_path_name = current_session_path + variables_from_ini_in_dic['backup_name']
                     if not process.backup_ok(conninlist, backup_full_path_name):
                         prompt_toolkit.print_formatted_text(
                             prompt_toolkit.HTML(
@@ -121,9 +122,20 @@ def main():
                                         conninlist,
                                         [config],
                                         variables_from_ini_in_dic,
-                                        current_session,
+                                        current_session_path,
                                         current_date)):
                         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failed to properly compute this indicator  : Connected at least once . Check the logs</b></Green></aaa>'))
+                    
+                    # Generate the indicator Usage (read/write) break down of the last 4 weeks
+
+                    if not (process.map_usage(
+                                        conninlist,
+                                        [config],
+                                        variables_from_ini_in_dic,
+                                        current_session_path,
+                                        current_date)):
+                        prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failed to properly compute this indicator  : Usage by teams . Check the logs</b></Green></aaa>'))
+
 
                 case 2: # generate the queries to insert users
                     logger.info('Choice made : 2, generate the queries to insert users')

@@ -239,3 +239,9 @@ print(l)
 
 retailers_and_cgi = ['a', 'b'] + ['cgi']
 print(retailers_and_cgi)
+#%%
+for i in range(10):
+    exec(f"def f_{i}(): print({i})")
+
+for i in range(10):
+    exec(f"f_{i}()")

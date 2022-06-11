@@ -1,6 +1,7 @@
 import os
 import configparser
 import sys
+import decouple
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(PROJECT_ROOT)
@@ -78,31 +79,41 @@ if __name__=="__main__":
     logger.info('Start of the test suite')
 
 
+    gmail_password = decouple.config('gmail_password', default=None)
+    assert gmail_password is not None
+
+
+
     conninlist, configinlist, variables_from_ini_in_dic = init_ok()
     
-    current_session, current_date = tools.create_current_session(variables_from_ini_in_dic['maindir'],
+
+    current_session_path, current_date = tools.create_current_session(variables_from_ini_in_dic['maindir'],
                                                                     variables_from_ini_in_dic['prefix'],
                                                                     variables_from_ini_in_dic['context'],
                                                                     variables_from_ini_in_dic['separator'])
-    assert current_session is not None                                                                    
-    backup_full_path_name = current_session + variables_from_ini_in_dic['backup_name']
-    assert mapprocess.backup_ok(conninlist, backup_full_path_name)
+    assert current_session_path is not None                                                                    
+
+    assert mapprocess.send_email(variables_from_ini_in_dic, current_session_path)
 
 
-    backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
-    assert mapprocess.backup_ok(conninlist, backup_full_path_name)
-    assert tools.queries_are_ok(conninlist, configinlist, variables_from_ini_in_dic)
-    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session, current_date)
-    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session, current_date)
+    # backup_full_path_name = current_session_path + variables_from_ini_in_dic['backup_name']
+    # assert mapprocess.backup_ok(conninlist, backup_full_path_name)
 
-    y = 2022
-    w = 20
-    b = 4
-    r = 0
-    year_week = mapprocess.year_week_to_begin(y, w, b, r)
-    assert year_week == 202216
 
-    assert mapprocess.usage_by_teams(conninlist, configinlist, variables_from_ini_in_dic, current_session, current_date)
+    # backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
+    # assert mapprocess.backup_ok(conninlist, backup_full_path_name)
+    # assert tools.queries_are_ok(conninlist, configinlist, variables_from_ini_in_dic)
+    # assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
+    # assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
+
+    # y = 2022
+    # w = 20
+    # b = 4
+    # r = 0
+    # year_week = mapprocess.year_week_to_begin(y, w, b, r)
+    # assert year_week == 202216
+
+    # assert mapprocess.map_usage(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
 
 
 

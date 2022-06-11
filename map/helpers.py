@@ -34,5 +34,5 @@ def welcome():
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<b>---------------------------------</b>'))
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> Choose an Option :</b></HotPink></aaa>'))
     prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 0 : Quit</b></HotPink></aaa>'))
-    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 1 : Generate the db in the ini file folder</b></HotPink></aaa>'))
-    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 2 : Generate the indicators</b></HotPink></aaa>'))    
+    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 1 : Generate the the indicators</b></HotPink></aaa>'))
+    prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="LightYellow"><HotPink><b> - 2 : Generate the creation of users</b></HotPink></aaa>'))    
