@@ -1,14 +1,11 @@
-from email.policy import default
 import logging
-from numpy import var
 import map.tools as tools
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime as dt
 import decouple
-import smtplib
-import ssl
-import email.message as message
+import yagmail
+import glob
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
@@ -60,11 +57,8 @@ def indicator_connected_at_least_once(conninlist: list, configinlist: list, vari
         mlogger.critical(f'Unexpected error in the function indicator_connected_at_least_once() : {type(be)}{be.args}')
         return False
 
-def send_email(variables_from_ini_in_dic: list, current_session_path: str) -> bool:
-    '''
-        Send by email all the images in a folder
-        https://github.com/kootenpv/yagmail#magical-contents
-    '''
+@tools.log_function_call
+def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, current_date: str) -> bool:
     try:
         mypassword = decouple.config('gmail_password', default=None)
         mysmtp = decouple.config('smtp', default=None)
@@ -72,22 +66,22 @@ def send_email(variables_from_ini_in_dic: list, current_session_path: str) -> bo
         if (mypassword is None or mysmtp is None or myport is None):
             mlogger.warning('Gmail config not found. Unable to generate mail')
         else:
-            mymail = message.EmailMessage()
-            mymail['Subject'] = variables_from_ini_in_dic['title']
-            mymail['From'] = variables_from_ini_in_dic['from']
-            mymail['To'] = variables_from_ini_in_dic['to']
-            mymail.set_content = gmail_beginning = variables_from_ini_in_dic['beginning'] + variables_from_ini_in_dic['ending']
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(mysmtp, myport, context=context) as smtp:
-                smtp.login(variables_from_ini_in_dic['from'], mypassword)
-                smtp.sendmail(variables_from_ini_in_dic['from'], variables_from_ini_in_dic['to'], mymail.as_string())
+            try:
+                content = [str(variables_from_ini_in_dic['beginning']).replace("#date", current_date)]
+            except:
+                content = [variables_from_ini_in_dic['beginning']]
+            for file in (glob.glob(current_session_path + "*.jpg",recursive=False)):
+                content.append(yagmail.inline(file))
+            content.append(variables_from_ini_in_dic['ending'])
+            
+            with yagmail.SMTP(variables_from_ini_in_dic['from'], mypassword) as mymail:
+                mymail.send(to=variables_from_ini_in_dic['to'],
+                            subject=variables_from_ini_in_dic['title'],
+                            contents=content)
             return True
-
     except BaseException as be:
         mlogger.critical(f'Unexpected error in the function send_email() : {type(be)}{be.args}')
         return False
-
-
 
 
 

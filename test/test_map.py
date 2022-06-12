@@ -93,28 +93,26 @@ if __name__=="__main__":
                                                                     variables_from_ini_in_dic['separator'])
     assert current_session_path is not None                                                                    
 
-    assert mapprocess.send_email(variables_from_ini_in_dic, current_session_path)
-
-
+    
     # backup_full_path_name = current_session_path + variables_from_ini_in_dic['backup_name']
     # assert mapprocess.backup_ok(conninlist, backup_full_path_name)
 
 
-    # backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
-    # assert mapprocess.backup_ok(conninlist, backup_full_path_name)
-    # assert tools.queries_are_ok(conninlist, configinlist, variables_from_ini_in_dic)
-    # assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
-    # assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
+    backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
+    assert mapprocess.backup_ok(conninlist, backup_full_path_name)
+    assert tools.queries_are_ok(conninlist, configinlist, variables_from_ini_in_dic)
+    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.indicator_connected_at_least_once(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
 
-    # y = 2022
-    # w = 20
-    # b = 4
-    # r = 0
-    # year_week = mapprocess.year_week_to_begin(y, w, b, r)
-    # assert year_week == 202216
+    y = 2022
+    w = 20
+    b = 4
+    r = 0
+    year_week = mapprocess.year_week_to_begin(y, w, b, r)
+    assert year_week == 202216
 
-    # assert mapprocess.map_usage(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.map_usage(conninlist, configinlist, variables_from_ini_in_dic, current_session_path, current_date)
 
-
+    assert mapprocess.send_yagmail(variables_from_ini_in_dic, current_session_path, current_date)
 
     fh.close()

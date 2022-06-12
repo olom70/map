@@ -136,6 +136,11 @@ def main():
                                         current_date)):
                         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failed to properly compute this indicator  : Usage by teams . Check the logs</b></Green></aaa>'))
 
+                    if not process.send_yagmail(variables_from_ini_in_dic,
+                                                current_session_path,
+                                                current_date):
+                        prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failure during the email generation. Check the logs</b></Green></aaa>'))
+
 
                 case 2: # generate the queries to insert users
                     logger.info('Choice made : 2, generate the queries to insert users')
