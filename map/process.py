@@ -63,7 +63,9 @@ def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, cur
         mypassword = decouple.config('gmail_password', default=None)
         mysmtp = decouple.config('smtp', default=None)
         myport = int(decouple.config('port', default=None))
-        if (mypassword is None or mysmtp is None or myport is None):
+        source = decouple.config('from', default=None)
+        recipient = decouple.config('to', default=None)
+        if (mypassword is None or mysmtp is None or myport is None or source is None or recipient is None ):
             mlogger.warning('Gmail config not found. Unable to generate mail')
         else:
             try:
@@ -74,8 +76,8 @@ def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, cur
                 content.append(yagmail.inline(file))
             content.append(variables_from_ini_in_dic['ending'])
             
-            with yagmail.SMTP(variables_from_ini_in_dic['from'], mypassword) as mymail:
-                mymail.send(to=variables_from_ini_in_dic['to'],
+            with yagmail.SMTP(source, mypassword) as mymail:
+                mymail.send(to=recipient,
                             subject=variables_from_ini_in_dic['title'],
                             contents=content)
             return True

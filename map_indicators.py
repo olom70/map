@@ -131,7 +131,7 @@ def main():
                     prompt_toolkit.print_formatted_text(
                         prompt_toolkit.HTML(
                             '<aaa bg="LightYellow"><HotPink><b>Generating the indicator : Usage (read/write).</b></HotPink></aaa>')
-
+                    )
 
                     if not (process.map_usage(
                                         conninlist,
@@ -144,7 +144,8 @@ def main():
                     prompt_toolkit.print_formatted_text(
                         prompt_toolkit.HTML(
                             '<aaa bg="LightYellow"><HotPink><b>Sending mail.</b></HotPink></aaa>')
-
+                    )
+                    
                     if not process.send_yagmail(variables_from_ini_in_dic,
                                                 current_session_path,
                                                 current_date):
@@ -153,7 +154,7 @@ def main():
                     prompt_toolkit.print_formatted_text(
                         prompt_toolkit.HTML(
                             '<aaa bg="LightYellow"><HotPink><b>Done. Going back to menu.</b></HotPink></aaa>')
-
+                    )
 
                 case 2: # generate the queries to insert users
                     logger.info('Choice made : 2, generate the queries to insert users')
