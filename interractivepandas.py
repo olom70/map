@@ -11,7 +11,7 @@ from map.tools import check_ini_files_and_return_config_object, create_main_vari
 INIFILE = 'map_indicators.ini'
 config = configparser.ConfigParser()
 config = check_ini_files_and_return_config_object(INIFILE)[0]
-variables_from_ini_in_dic = create_main_variables_from_config([config])
+variables_from_ini_in_dic = create_main_variables_from_config(config)
 conn = initialize_db(':memory:', variables_from_ini_in_dic['retailers'],
                                 variables_from_ini_in_dic['retailers_tables'],
                                 variables_from_ini_in_dic['toolkit_tables'],
@@ -21,7 +21,7 @@ backup_path, current_date = create_current_session(variables_from_ini_in_dic['ma
                                                 variables_from_ini_in_dic['prefix'],
                                                 variables_from_ini_in_dic['context'],
                                                 variables_from_ini_in_dic['separator'])
-all_queries_in_a_dict =  get_queries([config])
+all_queries_in_a_dict =  get_queries(config)
 #%%
 x = dict(iter(config.items('Sessions')))
 print(x)

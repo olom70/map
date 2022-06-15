@@ -1,10 +1,14 @@
 #%%
 import configparser
-config = configparser.ConfigParser()
-config.read('map_indicators.ini')
-config.sections()
-tables = config['Database']['tables'].split()
-print(tables)
+def c() -> list:
+    config = configparser.ConfigParser()
+    config.read('map_indicators.ini')
+    print(config)
+    return [config]
+
+config = c()[0]
+print(config)
+
 
 # %%
 import configparser
@@ -245,3 +249,5 @@ for i in range(10):
 
 for i in range(10):
     exec(f"f_{i}()")
+
+#%%

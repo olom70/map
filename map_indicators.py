@@ -24,14 +24,14 @@ def main():
     INIFILE = 'map_indicators.ini'
     logger.info(f'The name of the ini file is {INIFILE}')
     config = configparser.ConfigParser()
-    config = tools.check_ini_files_and_return_config_object(INIFILE)[0]
+    config = tools.check_ini_files_and_return_config_object(INIFILE)
     if 'Sessions' not in config:
         logger.critical(f'The ini file {INIFILE} is malformed or does not exists. Exiting the application.')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>The inifile does not exists. Check the logs</b></Green></aaa>'))
         fh.close()
         exit()
 
-    variables_from_ini_in_dic = tools.create_main_variables_from_config([config])
+    variables_from_ini_in_dic = tools.create_main_variables_from_config(config)
     if variables_from_ini_in_dic is None:
         logger.critical('One of the entry in the ini file triggered a critical error. Exiting the application')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One of the entry in the ini file triggered a critical error. Exiting the application. Check the logs</b></Green></aaa>'))
@@ -59,7 +59,7 @@ def main():
         fh.close()                    
         exit()
 
-    if not tools.queries_are_ok(conninlist, [config], variables_from_ini_in_dic):
+    if not tools.queries_are_ok(conninlist, config, variables_from_ini_in_dic):
         logger.critical('One the query returned an error while being validated')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One the query returned an error while being validated. check The logs</b></Green></aaa>'))
         fh.close()
@@ -120,7 +120,7 @@ def main():
                     )
                     if not (process.indicator_connected_at_least_once(
                                         conninlist,
-                                        [config],
+                                        config,
                                         variables_from_ini_in_dic,
                                         current_session_path,
                                         current_date)):
@@ -135,7 +135,7 @@ def main():
 
                     if not (process.map_usage(
                                         conninlist,
-                                        [config],
+                                        config,
                                         variables_from_ini_in_dic,
                                         current_session_path,
                                         current_date)):

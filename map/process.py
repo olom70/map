@@ -1,3 +1,4 @@
+import configparser
 import logging
 import map.tools as tools
 import pandas as pd
@@ -27,14 +28,14 @@ def backup_ok(conninlist: list, backup_full_path_name) -> bool:
         return False
 
 @tools.log_function_call
-def indicator_connected_at_least_once(conninlist: list, configinlist: list, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+def indicator_connected_at_least_once(conninlist: list, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
     '''
         Generate the indicator "Connected at least once"
         The goal is to follow if each of the declared users in map has connected at least once.
     '''
     try:
         for brand in variables_from_ini_in_dic['retailers']:
-            branded_query = tools.brand_query(tools.get_queries(configinlist)['connected_at_least_once_v2'],
+            branded_query = tools.brand_query(tools.get_queries(myconfig)['connected_at_least_once_v2'],
                                                 variables_from_ini_in_dic['tables'],
                                                 brand, variables_from_ini_in_dic['separator'])
             sql_query = pd.read_sql(branded_query, conninlist[0])
@@ -112,7 +113,7 @@ def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_wee
     return  year_week
 
 @tools.log_function_call
-def map_usage(conninlist: list, configinlist: list, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+def map_usage(conninlist: list, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
     '''
         Generate the indicator "usage"
         The use of the last 4 weeks
@@ -121,7 +122,7 @@ def map_usage(conninlist: list, configinlist: list, variables_from_ini_in_dic: l
     '''
     try:
         for retailer in variables_from_ini_in_dic['retailers']:
-            branded_query = tools.brand_query(tools.get_queries(configinlist)['request_history_v2'],
+            branded_query = tools.brand_query(tools.get_queries(myconfig)['request_history_v2'],
                                                 variables_from_ini_in_dic['tables'],
                                                 retailer, variables_from_ini_in_dic['separator'])
             sql_query = pd.read_sql(branded_query, conninlist[0])
