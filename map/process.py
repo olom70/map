@@ -7,16 +7,17 @@ import datetime as dt
 import decouple
 import yagmail
 import glob
+import sqlite3
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
 @tools.log_function_call
-def backup_ok(conninlist: list, backup_full_path_name) -> bool:
+def backup_ok(myconn: list, backup_full_path_name) -> bool:
     '''
     Backup the in memory database in the specified file
     '''
     try:
-        conn_backup = tools.backup_in_memory_db_to_disk(conninlist, backup_full_path_name)[0]
+        conn_backup = tools.backup_in_memory_db_to_disk(myconn, backup_full_path_name)
         if conn_backup is not None:
             mlogger.info('The in-memory DB has just been dumped to : {v}'.format(v=backup_full_path_name))
             conn_backup.close()
@@ -28,7 +29,7 @@ def backup_ok(conninlist: list, backup_full_path_name) -> bool:
         return False
 
 @tools.log_function_call
-def indicator_connected_at_least_once(conninlist: list, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+def indicator_connected_at_least_once(myconn: list, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
     '''
         Generate the indicator "Connected at least once"
         The goal is to follow if each of the declared users in map has connected at least once.
@@ -38,7 +39,7 @@ def indicator_connected_at_least_once(conninlist: list, myconfig: configparser.C
             branded_query = tools.brand_query(tools.get_queries(myconfig)['connected_at_least_once_v2'],
                                                 variables_from_ini_in_dic['tables'],
                                                 brand, variables_from_ini_in_dic['separator'])
-            sql_query = pd.read_sql(branded_query, conninlist[0])
+            sql_query = pd.read_sql(branded_query, myconn)
             df = pd.DataFrame(sql_query)
             try:
                 df.plot.barh(stacked=True,
@@ -113,7 +114,7 @@ def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_wee
     return  year_week
 
 @tools.log_function_call
-def map_usage(conninlist: list, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
     '''
         Generate the indicator "usage"
         The use of the last 4 weeks
@@ -125,7 +126,7 @@ def map_usage(conninlist: list, myconfig: configparser.ConfigParser, variables_f
             branded_query = tools.brand_query(tools.get_queries(myconfig)['request_history_v2'],
                                                 variables_from_ini_in_dic['tables'],
                                                 retailer, variables_from_ini_in_dic['separator'])
-            sql_query = pd.read_sql(branded_query, conninlist[0])
+            sql_query = pd.read_sql(branded_query, myconn)
             dfrq = pd.DataFrame(sql_query)
 
             # enrich the dataframe with the values needed by the indicator

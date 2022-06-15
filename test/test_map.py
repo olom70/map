@@ -57,14 +57,14 @@ def init_ok():
                                  variables_from_ini_in_dic['retailers_tables'],
                                  variables_from_ini_in_dic['toolkit_tables'],
                                  variables_from_ini_in_dic['file_ext'],
-                                 variables_from_ini_in_dic['iniFilesDir'])[0]
+                                 variables_from_ini_in_dic['iniFilesDir'])
     assert conn is not None
     cur = conn.cursor()
     cur.execute("select * from path")
     assert len(cur.fetchall()) > 0
 
 
-    return ([conn], config, variables_from_ini_in_dic)
+    return (conn, config, variables_from_ini_in_dic)
 
 
 if __name__=="__main__":
@@ -84,7 +84,7 @@ if __name__=="__main__":
 
 
 
-    conninlist, myconfig, variables_from_ini_in_dic = init_ok()
+    myconn, myconfig, variables_from_ini_in_dic = init_ok()
     
 
     current_session_path, current_date = tools.create_current_session(variables_from_ini_in_dic['maindir'],
@@ -94,15 +94,12 @@ if __name__=="__main__":
     assert current_session_path is not None                                                                    
 
     
-    # backup_full_path_name = current_session_path + variables_from_ini_in_dic['backup_name']
-    # assert mapprocess.backup_ok(conninlist, backup_full_path_name)
-
 
     backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
-    assert mapprocess.backup_ok(conninlist, backup_full_path_name)
-    assert tools.queries_are_ok(conninlist, myconfig, variables_from_ini_in_dic)
-    assert mapprocess.indicator_connected_at_least_once(conninlist, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
-    assert mapprocess.indicator_connected_at_least_once(conninlist, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.backup_ok(myconn, backup_full_path_name)
+    assert tools.queries_are_ok(myconn, myconfig, variables_from_ini_in_dic)
+    assert mapprocess.indicator_connected_at_least_once(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.indicator_connected_at_least_once(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
 
     y = 2022
     w = 20
@@ -111,7 +108,7 @@ if __name__=="__main__":
     year_week = mapprocess.year_week_to_begin(y, w, b, r)
     assert year_week == 202216
 
-    assert mapprocess.map_usage(conninlist, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.map_usage(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
 
     assert mapprocess.send_yagmail(variables_from_ini_in_dic, current_session_path, current_date)
 

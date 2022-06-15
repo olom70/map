@@ -47,26 +47,26 @@ def main():
         fh.close()
         exit()
 
-    conninlist = tools.initialize_db(':memory:',
+    myconn = tools.initialize_db(':memory:',
                                 variables_from_ini_in_dic['retailers'],
                                 variables_from_ini_in_dic['retailers_tables'],
                                 variables_from_ini_in_dic['toolkit_tables'],
                                 variables_from_ini_in_dic['file_ext'],
                                 variables_from_ini_in_dic['iniFilesDir'])
-    if conninlist[0] is None:
+    if myconn is None:
         logger.critical('Initialisation of the database failed. Exiting the application')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Initialisation of the database failed. Exiting the application. Check the logs</b></Green></aaa>'))
         fh.close()                    
         exit()
 
-    if not tools.queries_are_ok(conninlist, config, variables_from_ini_in_dic):
+    if not tools.queries_are_ok(myconn, config, variables_from_ini_in_dic):
         logger.critical('One the query returned an error while being validated')
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>One the query returned an error while being validated. check The logs</b></Green></aaa>'))
         fh.close()
         exit()
 
     backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
-    if not process.backup_ok(conninlist, backup_full_path_name):
+    if not process.backup_ok(myconn, backup_full_path_name):
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Copy of the database has failed. Exiting the application. Check the logs</b></Green></aaa>'))
  
     while True:
@@ -100,7 +100,7 @@ def main():
                                                             variables_from_ini_in_dic['separator']
                                                         )
                     backup_full_path_name = current_session_path + variables_from_ini_in_dic['backup_name']
-                    if not process.backup_ok(conninlist, backup_full_path_name):
+                    if not process.backup_ok(myconn, backup_full_path_name):
                         prompt_toolkit.print_formatted_text(
                             prompt_toolkit.HTML(
                                 '<aaa bg="DarkRed"><Green><b>Copy of the database has failed. Exiting the application. Check the logs</b></Green></aaa>')
@@ -119,7 +119,7 @@ def main():
                             '<aaa bg="LightYellow"><HotPink><b>Generating the indicator : Connected at least_once.</b></HotPink></aaa>')
                     )
                     if not (process.indicator_connected_at_least_once(
-                                        conninlist,
+                                        myconn,
                                         config,
                                         variables_from_ini_in_dic,
                                         current_session_path,
@@ -134,7 +134,7 @@ def main():
                     )
 
                     if not (process.map_usage(
-                                        conninlist,
+                                        myconn,
                                         config,
                                         variables_from_ini_in_dic,
                                         current_session_path,
