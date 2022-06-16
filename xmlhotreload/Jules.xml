@@ -794,7 +794,7 @@
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="MacroBusinessProcess" types="is before" />
                                 <outgoingEdgeType targetNodeTypes="BusinessProcess" types="is before, contains" />
-                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,PartnerApplication" types="uses" />
                             </outgoingEdgeTypes>
                         </nodeType>
                         <nodeType id="BusinessProcess">
@@ -842,7 +842,7 @@
                                 </outgoingEdgeType>
                                 <outgoingEdgeType targetNodeTypes="BusinessObject" types="has action on" />
                                 <outgoingEdgeType targetNodeTypes="BusinessProcess" types="calls" />
-                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication" types="uses" />
+                                <outgoingEdgeType targetNodeTypes="Application,MacroApplication,PartnerApplication" types="uses" />
                             </outgoingEdgeTypes>
                         </nodeType>
                         <nodeType id="Role">
@@ -912,10 +912,16 @@
                                 <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                                 <metadata id="status" />
+                                <metadata id="applicationType" />
+                                <metadata id="rasci" />
+                                <metadata id="serviceLevelAgreement" />
+                                <metadata id="availability" />
+                                <metadata id="contractScope" />
+                                <metadata id="location" ></metadata>
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="LogicalFlow,TechnicalFlow" types="is source of" />
-                                <outgoingEdgeType targetNodeTypes="BusinessObject,Schema" types="uses" >
+                                <outgoingEdgeType targetNodeTypes="BusinessObject,Application,MacroApplication,Schema" types="uses" >
                                     <metadatas>
                                         <metadata id="description" />
                                     </metadatas>
@@ -1044,7 +1050,7 @@
                                 <metadata id="fullConnectionString" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="Database,Application,PartnerApplication" types="hosts" />
+                                <outgoingEdgeType targetNodeTypes="Database,Application,PartnerApplication,TechnicalFlow" types="hosts" />
                                 <outgoingEdgeType targetNodeTypes="FileDirectory" types="contains" />
                             </outgoingEdgeTypes>
                         </nodeType>
