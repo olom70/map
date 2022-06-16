@@ -10,18 +10,18 @@ from openpyxl import Workbook
 from map.tools import check_ini_files_and_return_config_object, create_main_variables_from_config, initialize_db, create_current_session, get_queries, brand_query
 INIFILE = 'map_indicators.ini'
 config = configparser.ConfigParser()
-config = check_ini_files_and_return_config_object(INIFILE)[0]
-variables_from_ini_in_dic = create_main_variables_from_config([config])
+config = check_ini_files_and_return_config_object(INIFILE)
+variables_from_ini_in_dic = create_main_variables_from_config(config)
 conn = initialize_db(':memory:', variables_from_ini_in_dic['retailers'],
                                 variables_from_ini_in_dic['retailers_tables'],
                                 variables_from_ini_in_dic['toolkit_tables'],
                                 variables_from_ini_in_dic['file_ext'],
-                                variables_from_ini_in_dic['iniFilesDir'])[0]
+                                variables_from_ini_in_dic['iniFilesDir'])
 backup_path, current_date = create_current_session(variables_from_ini_in_dic['maindir'],
                                                 variables_from_ini_in_dic['prefix'],
                                                 variables_from_ini_in_dic['context'],
                                                 variables_from_ini_in_dic['separator'])
-all_queries_in_a_dict =  get_queries([config])
+all_queries_in_a_dict =  get_queries(config)
 #%%
 x = dict(iter(config.items('Sessions')))
 print(x)
@@ -37,7 +37,7 @@ print(x['retailers'])
 
 from map.tools import backup_in_memory_db_to_disk
 backup_full_path_name = backup_path + variables_from_ini_in_dic['backup_name']
-conn_backup = backup_in_memory_db_to_disk([conn], backup_full_path_name)[0]
+conn_backup = backup_in_memory_db_to_disk(conn, backup_full_path_name)
 
 # %%
 # ------------

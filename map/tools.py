@@ -51,7 +51,7 @@ def check_ini_files_and_return_config_object(inifile: str) -> list:
                     or config['Main']['log_level'] == 'ERROR'
                     or config['Main']['log_level'] == 'CRITICAL')):
         mlogger.info('function check_ini_files_and_return_config_object : execution OK. Returning config as expected')
-        return [config]
+        return config
     else:
         if 'Main' not in config:
             mlogger.critical('ini file lacks the Main section')
@@ -88,30 +88,29 @@ def check_ini_files_and_return_config_object(inifile: str) -> list:
         return None
 
 @log_function_call
-def create_main_variables_from_config(configinlist: list) -> dict:
+def create_main_variables_from_config(myconfig: configparser.ConfigParser) -> dict:
     '''
         from the ini file,  create all the variables from the sections 'Main' and 'Sessions' and return them in a dictionary
         return a tuple of None in case of a problem
     '''
     try:
-        config = configinlist[0]
 
-        variables_from_ini_in_dic = dict(iter(config.items('Main')))
-        variables_from_ini_in_dic.update(dict(iter(config.items('Sessions'))))
+        variables_from_ini_in_dic = dict(iter(myconfig.items('Main')))
+        variables_from_ini_in_dic.update(dict(iter(myconfig.items('Sessions'))))
         
         variables_from_ini_in_dic['retailers'] = variables_from_ini_in_dic['retailers'].split()
         variables_from_ini_in_dic['toolkit_tables'] = variables_from_ini_in_dic['toolkit_tables'].split()
         variables_from_ini_in_dic['tables'] = variables_from_ini_in_dic['tables'].split()
 
         if (platform.system() == 'Linux'):
-            variables_from_ini_in_dic['maindir'] = config['Main']['mainDirLinux']
+            variables_from_ini_in_dic['maindir'] = myconfig['Main']['mainDirLinux']
         else:
-            variables_from_ini_in_dic['maindir'] = config['Main']['mainDirWindows']
+            variables_from_ini_in_dic['maindir'] = myconfig['Main']['mainDirWindows']
 
         if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['maindir'], tail='', typeExtraction='mainDir', dir='dir'):
             raise ValueError('mainpath {mainDir} not found'.format(mainDir=variables_from_ini_in_dic['maindir']))    
 
-        variables_from_ini_in_dic['iniFilesDir'] = variables_from_ini_in_dic['maindir'] + os.path.sep + config['Main']['iniFilesDir']
+        variables_from_ini_in_dic['iniFilesDir'] = variables_from_ini_in_dic['maindir'] + os.path.sep + myconfig['Main']['iniFilesDir']
         if not fileutil.file_exists_TrueFalse(head=variables_from_ini_in_dic['iniFilesDir'], tail='', typeExtraction='mainDir', dir='dir'):
             raise ValueError('mainpath {iniFilesDir} not found'.format(mainDir=variables_from_ini_in_dic['iniFilesDir']))    
 
@@ -147,7 +146,7 @@ def create_main_variables_from_config(configinlist: list) -> dict:
         return None
 
 @log_function_call
-def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, toolkit_tables: str, file_ext: str, iniFilesDir: str) -> list:
+def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, toolkit_tables: str, file_ext: str, iniFilesDir: str) -> sqlite3.connect:
     '''
         Load all the files in the database
         return a list with the connection object or None
@@ -168,7 +167,7 @@ def initialize_db(db_full_path : str, retailers: str, retailers_tables: str, too
                 df = pd.read_csv(file_to_load)
                 df.to_sql(name=table, con=conn)
         mlogger.info('function initialize_db : execution OK. Returning connection object as expected')
-        return [conn]
+        return conn
     except BaseException as be:
         mlogger.critical(f'U initialize_db() : {type(be)}{be.args}')
         return None
@@ -213,7 +212,7 @@ def progress(status, remaining, total):
     mlogger.info(f'Copied {total-remaining} of {total} pages...')
 
 @log_function_call
-def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str ) -> list:
+def backup_in_memory_db_to_disk(myconfig: sqlite3.connect, backup_full_path_name: str ) -> sqlite3.connect:
     '''
         Backup the sqlite db in the specified path
         return de connection object in a list or None
@@ -221,24 +220,23 @@ def backup_in_memory_db_to_disk(conn_in_list: list, backup_full_path_name: str )
     try:
         conn_backup = sqlite3.connect(backup_full_path_name)
         with conn_backup:
-            conn_in_list[0].backup(conn_backup, progress=progress)
+            myconfig.backup(conn_backup, progress=progress)
         mlogger.info('function backup_in_memory_db_to_disk : execution OK. Returning backup db connection as expected')
-        return [conn_backup]
+        return conn_backup
     except BaseException as be:
         mlogger.critical(f'unexpected error in the function backup_in_memory_db_to_disk() : {type(be)}{be.args}')
         return None
 
 @log_function_call
-def get_queries(configinlist: list) -> dict:
+def get_queries(myconfig: configparser.ConfigParser) -> dict:
     '''
         Load all the queries in a dictionary or None
     '''
     try:
-        config = configinlist[0]
         queries_in_a_dict = dict()
-        if 'Queries' in config:
-            for val in config['Queries']:
-                queries_in_a_dict[val] = config['Queries'][val]
+        if 'Queries' in myconfig:
+            for val in myconfig['Queries']:
+                queries_in_a_dict[val] = myconfig['Queries'][val]
         else:
             mlogger.critical('Section Queries does not exists')
             return None
@@ -272,15 +270,15 @@ def brand_query(query: str, tables: list, brand: str, separator: str) -> str:
         return None
 
 @log_function_call
-def queries_are_ok(conninlist: list, configinlist: list, variables_from_ini_in_dic: list) -> Boolean:
+def queries_are_ok(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list) -> Boolean:
     '''
         Check all the queries against a retailer to validate that they execute well
     '''
     try:
         all_queries_in_a_dict = dict()
-        all_queries_in_a_dict =  get_queries(configinlist)
+        all_queries_in_a_dict =  get_queries(myconfig)
 
-        cur = conninlist[0].cursor()
+        cur = myconn.cursor()
 
         for query in all_queries_in_a_dict.values():
             mlogger.info(f'query being checked : {query}')
