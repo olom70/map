@@ -1050,7 +1050,7 @@
                                 <metadata id="fullConnectionString" />
                             </metadatas>
                             <outgoingEdgeTypes>
-                                <outgoingEdgeType targetNodeTypes="Database,Application,PartnerApplication,TechnicalFlow" types="hosts" />
+                                <outgoingEdgeType targetNodeTypes="Database,Application,PartnerApplication,TechnicalFlow,Middleware" types="hosts" />
                                 <outgoingEdgeType targetNodeTypes="FileDirectory" types="contains" />
                             </outgoingEdgeTypes>
                         </nodeType>
