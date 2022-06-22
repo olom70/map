@@ -894,6 +894,12 @@
                                 <metadata id="contractScope" />
                                 <metadata id="location" ></metadata>
                                 <metadata id="comments" />
+                                <metadata id="RGPD sensitive" >
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="status" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -917,6 +923,12 @@
                                 <metadata id="serviceLevelAgreement" />
                                 <metadata id="availability" />
                                 <metadata id="contractScope" />
+                                <metadata id="RGPD sensitive" >
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="location" ></metadata>
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -940,6 +952,12 @@
                                 <metadata id="contractScope" />
                                 <metadata id="location" />
                                 <metadata id="comments" />
+                                <metadata id="RGPD sensitive" >
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="status" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -960,6 +978,12 @@
                                 <metadata id="contractScope" />
                                 <metadata id="location" />
                                 <metadata id="comments" />
+                                <metadata id="RGPD sensitive" >
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="status" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -1002,6 +1026,12 @@
                                 <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                                 <metadata id="status" />
+                                <metadata id="RGPD sensitive" >
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="contact" />
                             </metadatas>
                             <outgoingEdgeTypes>
@@ -1082,6 +1112,12 @@
                                 <metadata id="linkToDocumentation" />
                                 <metadata id="comments" />
                                 <metadata id="stambiaDescription" />
+                                <metadata id="RGPD sensitive" >
+                                    <allowedValues>
+                                        <value>Oui</value>
+                                        <value>Non</value>
+                                    </allowedValues>
+                                </metadata>
                                 <metadata id="flowType">
                                     <allowedValues>
                                         <value>Stambia</value>
