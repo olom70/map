@@ -215,7 +215,7 @@ def progress(status, remaining, total):
 def backup_in_memory_db_to_disk(myconfig: sqlite3.connect, backup_full_path_name: str ) -> sqlite3.connect:
     '''
         Backup the sqlite db in the specified path
-        return de connection object in a list or None
+        return de connection object or None
     '''
     try:
         conn_backup = sqlite3.connect(backup_full_path_name)
