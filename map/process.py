@@ -8,7 +8,6 @@ import decouple
 import yagmail
 import glob
 import sqlite3
-import pendulum
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
@@ -144,6 +143,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
             year = int(dfrq['access_year'].max())
             dly = dfrq.loc[dfrq['access_year'] == dfrq['access_year'].max()]
             week = int(dly['access_week'].max())
+            max_date = dly['access_date_to_path'].max()
             backward_in_week = int(variables_from_ini_in_dic['backward_in_week'])
             number_of_weeks_to_remove = int(variables_from_ini_in_dic['number_of_weeks_to_remove'])
             year_week = year_week_to_begin(year,
@@ -151,19 +151,20 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                                 backward_in_week,
                                                 number_of_weeks_to_remove)
 
-            def up_to_that_date(current_date: str, year_week: int) -> str:
+            def up_to_that_date(current_date: str, year: int, week: int) -> str:
                 '''
                     Compare the last day of the week contained year-week and current_date
                     return the lowest
                 '''
-                extraction_date = dt.datetime.strptime(current_date, '%Y-%m-%d')
-                last_day_of_the_extracted_week = dt.datetime.strptime(str(year_week) + '-7', '%G%V-%u')
+                extraction_date = dt.datetime.strptime(current_date, '%Y-%m-%d').date()
+                last_day_of_the_extracted_week = dt.datetime.strptime(str(year)+ str(week) + '-7', '%G%V-%u').date()
                 if (extraction_date > last_day_of_the_extracted_week):
                     return last_day_of_the_extracted_week
                 else:
                     return extraction_date
 
-            date_to_display = up_to_that_date(current_date, year_week)
+            timeframe_up_to_that_date = up_to_that_date(current_date, year, week)
+            timeframe_from_that_date = dt.datetime.strptime(str(year_week) + '-1', '%G%V-%u').date()
 
             filtered_dfrq = dfrq.loc[
                         dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
@@ -192,7 +193,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Team, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : Read Only Activity by {entreprise}. Breakdown by teams from {timeframe_from_that_date} to {timeframe_up_to_that_date}',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -226,7 +227,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Team, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : Contribution by {entreprise}. Breakdown by teams from {timeframe_from_that_date} to {timeframe_up_to_that_date}',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -259,7 +260,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Entreprise, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : Read Only Activity by {entreprise}. Breakdown from {timeframe_from_that_date} to {timeframe_up_to_that_date}',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -292,7 +293,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Entreprise, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} :  Contribution by {entreprise}. Breakdown from {timeframe_from_that_date} to {timeframe_up_to_that_date}',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -315,5 +316,3 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
     except BaseException as be:
         mlogger.critical(f'Unexpected error in the function usage_by_teams() : {type(be)}{be.args}')
         return False
-
-    
