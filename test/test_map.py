@@ -79,8 +79,8 @@ if __name__=="__main__":
     logger.info('Start of the test suite')
 
 
-    gmail_password = decouple.config('gmail_password', default=None)
-    assert gmail_password is not None
+    # gmail_password = decouple.config('gmail_password', default=None)
+    # assert gmail_password is not None
 
 
 

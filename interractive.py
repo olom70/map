@@ -251,3 +251,29 @@ for i in range(10):
     exec(f"f_{i}()")
 
 #%%
+import pendulum
+x = 202230
+year = str(x)[0:4]
+print(year)
+week = str(x)[4:]
+print(week)
+
+current_date = '2022-06-24'
+extraction_date = pendulum.from_format(current_date, 'YYYY-MM-DD')
+x = 202230
+year = str(x)[0:4]
+print(year)
+week = str(x)[4:]
+
+import datetime
+d = "201326"
+r = datetime.datetime.strptime(d + '-1', "%Y%u")
+print(r)
+#%%
+import datetime as dt
+year_week = 202226
+current_date = '2022-06-27'
+extraction_date = dt.datetime.strptime(current_date, '%Y-%m-%d')
+last_day_of_the_extracted_week = dt.datetime.strptime(str(year_week) + '-7', '%G%V-%u')
+print(extraction_date)
+print(last_day_of_the_extracted_week)

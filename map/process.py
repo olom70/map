@@ -8,6 +8,7 @@ import decouple
 import yagmail
 import glob
 import sqlite3
+import pendulum
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
@@ -150,6 +151,20 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                                 backward_in_week,
                                                 number_of_weeks_to_remove)
 
+            def up_to_that_date(current_date: str, year_week: int) -> str:
+                '''
+                    Compare the last day of the week contained year-week and current_date
+                    return the lowest
+                '''
+                extraction_date = dt.datetime.strptime(current_date, '%Y-%m-%d')
+                last_day_of_the_extracted_week = dt.datetime.strptime(str(year_week) + '-7', '%G%V-%u')
+                if (extraction_date > last_day_of_the_extracted_week):
+                    return last_day_of_the_extracted_week
+                else:
+                    return extraction_date
+
+            date_to_display = up_to_that_date(current_date, year_week)
+
             filtered_dfrq = dfrq.loc[
                         dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[
                             dfrq['access_year_week'].map(int) >= year_week
@@ -177,7 +192,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Team, YearWeekNumber)',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -211,7 +226,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Team, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Team, YearWeekNumber)',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -244,7 +259,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Entreprise, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Entreprise, YearWeekNumber)',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
@@ -277,7 +292,7 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                             ]
                                         ).count().plot.bar(y='access_date_to_path',
                                                             stacked=True,
-                                                            title=f'{retailer.capitalize()} : VIEW activity up to {current_date} (by Entreprise, YearWeekNumber)',
+                                                            title=f'{retailer.capitalize()} : VIEW activity up to {date_to_display} (by Entreprise, YearWeekNumber)',
                                                             figsize= (15,10),
                                                             fontsize=13)
                 except IndexError:
