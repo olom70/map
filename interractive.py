@@ -271,9 +271,15 @@ r = datetime.datetime.strptime(d + '-1', "%Y%u")
 print(r)
 #%%
 import datetime as dt
-year_week = 202226
-current_date = '2022-06-27'
-extraction_date = dt.datetime.strptime(current_date, '%Y-%m-%d')
-last_day_of_the_extracted_week = dt.datetime.strptime(str(year_week) + '-7', '%G%V-%u')
-print(extraction_date)
+year = 2022
+week = 25
+last_day_of_the_extracted_week = dt.datetime.strptime(str(year)+ str(week) + '-7', '%G%V-%u').date()
+first_day_of_the_extracted_week = dt.datetime.strptime(str(year)+ str(week) + '-1', '%G%V-%u').date()
 print(last_day_of_the_extracted_week)
+print(first_day_of_the_extracted_week)
+#%%
+import map.state as state
+
+mystate = state.state()
+state. reminder = 'r'
+print(state.reminder)

@@ -87,7 +87,32 @@ def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, cur
         mlogger.critical(f'Unexpected error in the function send_email() : {type(be)}{be.args}')
         return False
 
-
+@tools.log_function_call
+def print_write_time_frame(first_week_year : int, first_week_week: int, second_week_year: int, second_week_week:int, path: str) -> dict:
+    '''
+        generate a string with a reminder of the start and end of the given weeks
+    '''
+    try:
+        first_day_of_the_first_week = dt.datetime.strptime(str(first_week_year)+ str(first_week_week) + '-1', '%G%V-%u').date()
+        last_day_of_the_first_week = dt.datetime.strptime(str(first_week_year)+ str(first_week_week) + '-7', '%G%V-%u').date()
+        first_day_of_the_last_week = dt.datetime.strptime(str(second_week_year)+ str(second_week_week) + '-1', '%G%V-%u').date()
+        last_day_of_the_last_week = dt.datetime.strptime(str(second_week_year)+ str(second_week_week) + '-7', '%G%V-%u').date()
+        to_print = f'''
+        As a reminder :
+        Week {first_week_week} of {first_week_year} is between {first_day_of_the_first_week} and {last_day_of_the_first_week}.
+        Week {second_week_week} of {second_week_year} is between {first_day_of_the_last_week} and {last_day_of_the_last_week}.
+        '''
+        try:
+            full_path = path+'reminder.txt'
+            with open(full_path, 'w', encoding="utf-8") as f:
+                f.writeline(to_print)
+        except:
+            mlogger.warning(f'Error while writing the file {full_path}, that part will miss in the email.')
+        return to_print
+    except BaseException as be:
+        mlogger.critical(f'Unexpected error in the function print_time_frame() : {type(be)}{be.args}')
+        return False
+    
 
 @tools.log_function_call
 def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_weeks_to_remove: int) -> int:
