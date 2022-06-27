@@ -5,3 +5,4 @@ from map.tools import get_queries, brand_query, log_function_call
 from map.fileutil import get_files, file_exists, file_exists_TrueFalse
 from map.helpers import validator, validator_yn, welcome, are_all_files_ok
 from map.process import backup_ok, indicator_connected_at_least_once, year_week_to_begin
+from map.state import Mapstate

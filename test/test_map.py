@@ -9,6 +9,7 @@ from pytest import raises
 import map.tools as tools
 import map.process as mapprocess
 import logging
+import map.state as state
 
 def init_ok():
     # Firstly, check if the inifile exists and has all the required keys
@@ -79,10 +80,10 @@ if __name__=="__main__":
     logger.info('Start of the test suite')
 
 
-    # gmail_password = decouple.config('gmail_password', default=None)
-    # assert gmail_password is not None
+    gmail_password = decouple.config('gmail_password', default=None)
+    assert gmail_password is not None
 
-
+    mapstate = state.Mapstate()
 
     myconn, myconfig, variables_from_ini_in_dic = init_ok()
     
@@ -99,7 +100,6 @@ if __name__=="__main__":
     assert mapprocess.backup_ok(myconn, backup_full_path_name)
     assert tools.queries_are_ok(myconn, myconfig, variables_from_ini_in_dic)
     assert mapprocess.indicator_connected_at_least_once(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
-    assert mapprocess.indicator_connected_at_least_once(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
 
     y = 2022
     w = 20
@@ -108,8 +108,8 @@ if __name__=="__main__":
     year_week = mapprocess.year_week_to_begin(y, w, b, r)
     assert year_week == 202216
 
-    assert mapprocess.map_usage(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.map_usage(myconn, myconfig, variables_from_ini_in_dic, current_session_path, current_date, mapstate)
 
-    assert mapprocess.send_yagmail(variables_from_ini_in_dic, current_session_path, current_date)
+    assert mapprocess.send_yagmail(variables_from_ini_in_dic, current_session_path, current_date, mapstate)
 
     fh.close()

@@ -1,5 +1,7 @@
 import configparser
 import logging
+
+from pendulum import time
 import map.tools as tools
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,6 +10,7 @@ import decouple
 import yagmail
 import glob
 import sqlite3
+import map.state as state
 
 mlogger = logging.getLogger('map_indicator_app.tools')
 
@@ -60,7 +63,7 @@ def indicator_connected_at_least_once(myconn: list, myconfig: configparser.Confi
         return False
 
 @tools.log_function_call
-def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, current_date: str) -> bool:
+def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, current_date: str, mapstate: state.Mapstate) -> bool:
     try:
         mypassword = decouple.config('gmail_password', default=None)
         mysmtp = decouple.config('smtp', default=None)
@@ -74,6 +77,7 @@ def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, cur
                 content = [str(variables_from_ini_in_dic['beginning']).replace("#date", current_date)]
             except:
                 content = [variables_from_ini_in_dic['beginning']]
+            content.append(mapstate.reminder)
             for file in (glob.glob(current_session_path + "*.jpg",recursive=False)):
                 content.append(yagmail.inline(file))
             content.append(variables_from_ini_in_dic['ending'])
@@ -88,7 +92,7 @@ def send_yagmail(variables_from_ini_in_dic: list, current_session_path: str, cur
         return False
 
 @tools.log_function_call
-def print_write_time_frame(first_week_year : int, first_week_week: int, second_week_year: int, second_week_week:int, path: str) -> dict:
+def print_write_time_frame(first_week_year : int, first_week_week: int, second_week_year: int, second_week_week:int) -> str:
     '''
         generate a string with a reminder of the start and end of the given weeks
     '''
@@ -102,16 +106,10 @@ def print_write_time_frame(first_week_year : int, first_week_week: int, second_w
         Week {first_week_week} of {first_week_year} is between {first_day_of_the_first_week} and {last_day_of_the_first_week}.
         Week {second_week_week} of {second_week_year} is between {first_day_of_the_last_week} and {last_day_of_the_last_week}.
         '''
-        try:
-            full_path = path+'reminder.txt'
-            with open(full_path, 'w', encoding="utf-8") as f:
-                f.writeline(to_print)
-        except:
-            mlogger.warning(f'Error while writing the file {full_path}, that part will miss in the email.')
         return to_print
     except BaseException as be:
         mlogger.critical(f'Unexpected error in the function print_time_frame() : {type(be)}{be.args}')
-        return False
+        return None
     
 
 @tools.log_function_call
@@ -139,7 +137,7 @@ def year_week_to_begin(year: int, week:int, backward_in_week: int, number_of_wee
     return  year_week
 
 @tools.log_function_call
-def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str) -> bool:
+def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, variables_from_ini_in_dic: list, backup_path: str, current_date: str, mapstate: state.Mapstate) -> bool:
     '''
         Generate the indicator "usage"
         The use of the last 4 weeks
@@ -177,6 +175,8 @@ def map_usage(myconn: sqlite3.connect, myconfig: configparser.ConfigParser, vari
                                                 backward_in_week,
                                                 number_of_weeks_to_remove)
             timeframe_from_that_date = dt.datetime.strptime(str(year_week) + '-1', '%G%V-%u').date()
+
+            mapstate.reminder = print_write_time_frame(str(year_week)[0:4], str(year_week)[4:], year, week)
 
             filtered_dfrq = dfrq.loc[
                         dfrq['doNotBotherWith_connectionReminder'] != 'Oui'].loc[

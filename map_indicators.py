@@ -8,6 +8,7 @@ import map.process as process
 # https://python-prompt-toolkit.readthedocs.io/en/master/pages/getting_started.html
 from map import tools
 from map import helpers
+import map.state as state
 
 logger = logging.getLogger('map_indicator_app')
 logger.setLevel(logging.DEBUG)
@@ -68,6 +69,9 @@ def main():
     backup_full_path_name = variables_from_ini_in_dic['iniFilesDir'] + os.path.sep + variables_from_ini_in_dic['backup_name']
     if not process.backup_ok(myconn, backup_full_path_name):
         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Copy of the database has failed. Exiting the application. Check the logs</b></Green></aaa>'))
+        exit()
+
+    mapstate = state.Mapstate()
  
     while True:
         helpers.welcome()
@@ -138,7 +142,8 @@ def main():
                                         config,
                                         variables_from_ini_in_dic,
                                         current_session_path,
-                                        current_date)):
+                                        current_date,
+                                        mapstate)):
                         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failed to properly compute this indicator  : Usage by teams . Check the logs</b></Green></aaa>'))
 
                     prompt_toolkit.print_formatted_text(
@@ -148,7 +153,8 @@ def main():
                     
                     if not process.send_yagmail(variables_from_ini_in_dic,
                                                 current_session_path,
-                                                current_date):
+                                                current_date,
+                                                mapstate):
                         prompt_toolkit.print_formatted_text(prompt_toolkit.HTML('<aaa bg="DarkRed"><Green><b>Failure during the email generation. Check the logs</b></Green></aaa>'))
 
                     prompt_toolkit.print_formatted_text(

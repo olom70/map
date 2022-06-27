@@ -265,10 +265,6 @@ year = str(x)[0:4]
 print(year)
 week = str(x)[4:]
 
-import datetime
-d = "201326"
-r = datetime.datetime.strptime(d + '-1', "%Y%u")
-print(r)
 #%%
 import datetime as dt
 year = 2022
@@ -280,6 +276,6 @@ print(first_day_of_the_extracted_week)
 #%%
 import map.state as state
 
-mystate = state.state()
-state. reminder = 'r'
-print(state.reminder)
+mystate = state.Mapstate()
+mystate.reminder = 'r'
+print(mystate.reminder)
