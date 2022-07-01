@@ -1084,6 +1084,11 @@
                                     </allowedValues>
                                 </metadata>
                                 <metadata id="fullConnectionString" />
+                                <metadata id="TYPE" />
+                                <metadata id="TARGET" />
+                                <metadata id="VM" />
+                                <metadata id="VCENTER" />
+                                <metadata id="DOMAIN" />
                             </metadatas>
                             <outgoingEdgeTypes>
                                 <outgoingEdgeType targetNodeTypes="Database,Application,PartnerApplication,TechnicalFlow,Middleware" types="hosts" />
